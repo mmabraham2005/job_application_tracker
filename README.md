@@ -1,2 +1,2 @@
-# job_application_tracker_team9
+# job_application_tracker
 Project for CS 160, Team 9
