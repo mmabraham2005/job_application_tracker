@@ -1,8 +1,18 @@
 const mongoose = require("mongoose");
 const Application = require("../models/Application");
 
+const isValidApplicationId = (id) => mongoose.isValidObjectId(id);
+
+const isValidationError = (error) =>
+  error.name === "ValidationError" || error.name === "CastError";
+
 const createApplication = async (req, res) => {
   try {
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return res.status(400).json({
+        message: "Request body must be a JSON object",
+      });
+    }
     const { companyName, jobTitle, applicationDate, status } = req.body;
 
     const application = new Application({
@@ -14,11 +24,17 @@ const createApplication = async (req, res) => {
 
     const savedApplication = await application.save();
 
-    res.status(201).json(savedApplication);
+    return res.status(201).json(savedApplication);
   } catch (error) {
-    res.status(400).json({
+    if (isValidationError(error)) {
+      return res.status(400).json({
+        message: "Invalid application data",
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
       message: "Failed to save application",
-      error: error.message,
     });
   }
 };
@@ -26,11 +42,10 @@ const createApplication = async (req, res) => {
 const getApplications = async (req, res) => {
   try {
     const applications = await Application.find();
-    res.status(200).json(applications);
+    return res.status(200).json(applications);
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Failed to retrieve applications",
-      error: error.message,
     });
   }
 };
@@ -39,15 +54,21 @@ const updateApplication = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.isValidObjectId(id)) {
+    if (!isValidApplicationId(id)) {
       return res.status(400).json({
         message: "Invalid application ID",
       });
     }
 
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return res.status(400).json({
+        message: "Request body must be a JSON object",
+      });
+    }
+
     const allowedFields = ["companyName", "jobTitle", "applicationDate"];
 
-    const updates = Object.keys(req.body ?? {});
+    const updates = Object.keys(req.body);
 
     if (
       updates.length === 0 ||
@@ -62,7 +83,7 @@ const updateApplication = async (req, res) => {
 
     if (!application) {
       return res.status(404).json({
-        message: "Application not found!",
+        message: "Application not found",
       });
     }
 
@@ -74,7 +95,7 @@ const updateApplication = async (req, res) => {
 
     return res.status(200).json(updatedApplication);
   } catch (error) {
-    if (error.name === "ValidationError" || error.name === "CastError") {
+    if (isValidationError(error)) {
       return res.status(400).json({
         message: "Invalid application data",
         error: error.message,
@@ -90,13 +111,26 @@ const updateApplication = async (req, res) => {
 const updateApplicationStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body ?? {};
 
-    if (!mongoose.isValidObjectId(id)) {
+    if (!isValidApplicationId(id)) {
       return res.status(400).json({
         message: "Invalid application ID",
       });
     }
+
+    if (
+      !req.body ||
+      typeof req.body !== "object" ||
+      Array.isArray(req.body) ||
+      Object.keys(req.body).length !== 1 ||
+      !Object.hasOwn(req.body, "status")
+    ) {
+      return res.status(400).json({
+        message: "Only the status field is allowed",
+      });
+    }
+
+    const { status } = req.body;
 
     if (typeof status !== "string" || !status.trim()) {
       return res.status(400).json({
@@ -118,7 +152,7 @@ const updateApplicationStatus = async (req, res) => {
 
     return res.status(200).json(updatedApplication);
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (isValidationError(error)) {
       return res.status(400).json({
         message: "Invalid application status",
         error: error.message,
@@ -135,7 +169,7 @@ const deleteApplication = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.isValidObjectId(id)) {
+    if (!isValidApplicationId(id)) {
       return res.status(400).json({
         message: "Invalid application ID",
       });
