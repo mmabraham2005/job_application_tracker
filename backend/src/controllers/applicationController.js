@@ -87,8 +87,53 @@ const updateApplication = async (req, res) => {
   }
 };
 
+const updateApplicationStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body ?? {};
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        message: "Invalid application ID",
+      });
+    }
+
+    if (typeof status !== "string" || !status.trim()) {
+      return res.status(400).json({
+        message: "Valid status is required",
+      });
+    }
+
+    const application = await Application.findById(id);
+
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
+
+    application.status = status;
+
+    const updatedApplication = await application.save();
+
+    return res.status(200).json(updatedApplication);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Invalid application status",
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: "Failed to update application status",
+    });
+  }
+};
+
 module.exports = {
   createApplication,
   getApplications,
   updateApplication,
+  updateApplicationStatus,
 };

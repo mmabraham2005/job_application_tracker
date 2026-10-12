@@ -1,4 +1,14 @@
-const STATUSES = ["Applied", "Interview", "Offer", "Rejected"];
+const STATUSES = [
+  "Applied",
+  "Under Review",
+  "Interview",
+  "Second Interview",
+  "Final Interview",
+  "Offer",
+  "Accepted",
+  "Rejected",
+  "Withdrawn",
+];
 
 class ApplicationData {
   #companyName;
@@ -6,7 +16,12 @@ class ApplicationData {
   #applicationDate;
   #status;
 
-  constructor(companyName, jobTitle, applicationDate = new Date(), status = "Applied") {
+  constructor(
+    companyName,
+    jobTitle,
+    applicationDate = new Date(),
+    status = "Applied",
+  ) {
     this.#companyName = companyName;
     this.#jobTitle = jobTitle;
     this.#applicationDate = new Date(applicationDate);
@@ -31,12 +46,13 @@ class ApplicationData {
 
   setStatus(status) {
     if (!STATUSES.includes(status)) {
-      throw new Error(`Invalid status "${status}". Must be one of: ${STATUSES.join(", ")}`);
+      throw new Error(
+        `Invalid status "${status}". Must be one of: ${STATUSES.join(", ")}`,
+      );
     }
     this.#status = status;
   }
 
-  
   toJSON() {
     return {
       companyName: this.#companyName,
