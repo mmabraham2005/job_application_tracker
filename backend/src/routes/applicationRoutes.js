@@ -2,11 +2,13 @@ const express = require("express");
 const {
   createApplication,
   getApplications,
+  updateApplication,
 } = require("../controllers/applicationController");
 
 const router = express.Router();
 
 router.post("/", createApplication);
 router.get("/", getApplications);
+router.patch("/:id", updateApplication);
 
 module.exports = router;
