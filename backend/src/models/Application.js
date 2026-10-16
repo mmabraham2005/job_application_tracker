@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { STATUSES } = require("./ApplicationData");
 
 const applicationSchema = new mongoose.Schema({
   companyName: {
@@ -17,7 +18,7 @@ const applicationSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Applied", "Interview", "Offer", "Rejected"],
+    enum: STATUSES,
     required: true,
   },
 });
