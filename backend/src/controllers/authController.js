@@ -1,5 +1,5 @@
 const { OAuth2Client } = require("google-auth-library");
-const { User } = require("../models/User");
+const User = require("../models/User");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -13,12 +13,22 @@ const googleLogin = async (req, res) => {
       });
     }
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    let payload;
 
-    const payload = ticket.getPayload();
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      payload = ticket.getPayload();
+    } catch (error) {
+      console.error("Google token verification failed:", error.message);
+
+      return res.status(401).json({
+        message: "Invalid or expired Google credential",
+      });
+    }
 
     if (!payload?.sub || !payload.email_verified) {
       return res.status(401).json({
@@ -26,32 +36,65 @@ const googleLogin = async (req, res) => {
       });
     }
 
-    let user = await User.findOne({
-      authProvider: "google",
-      googleId: payload.sub,
-    });
-
-    if (!user) {
-      user = await User.create({
+    try {
+      let user = await User.findOne({
         authProvider: "google",
         googleId: payload.sub,
-        email: payload.email,
-        displayName: payload.name,
-        avatarUrl: payload.picture,
+      });
+
+      if (!user) {
+        user = await User.findOneAndUpdate(
+          {
+            authProvider: "google",
+            googleId: payload.sub,
+          },
+          {
+            $setOnInsert: {
+              email: payload.email,
+              displayName: payload.name,
+              avatarUrl: payload.picture,
+            },
+          },
+          {
+            upsert: true,
+            new: true,
+            runValidators: true,
+          },
+        );
+      }
+
+      await new Promise((resolve, reject) => {
+        req.session.regenerate((error) => {
+          if (error) return reject(error);
+          resolve();
+        });
+      });
+
+      req.session.userId = user._id.toString();
+
+      await new Promise((resolve, reject) => {
+        req.session.save((error) => {
+          if (error) return reject(error);
+          resolve();
+        });
+      });
+
+      return res.status(200).json({
+        user: {
+          id: user._id,
+          authProvider: user.authProvider,
+          email: user.email,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+        },
+      });
+    } catch (error) {
+      console.error("Google login failed:", error);
+
+      return res.status(500).json({
+        message: "Failed to complete Google login",
       });
     }
-
-    req.session.userId = user._id.toString();
-
-    return res.status(200).json({
-      user: {
-        id: user._id,
-        authProvider: user.authProvider,
-        email: user.email,
-        displayName: user.displayName,
-        avatarUrl: user.avatarUrl,
-      },
-    });
   } catch (error) {
     console.error("Google login failed:", error.message);
 
