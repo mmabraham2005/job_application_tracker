@@ -104,4 +104,40 @@ const googleLogin = async (req, res) => {
   }
 };
 
-module.exports = { googleLogin };
+const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "Not authenticated",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Not authenticated",
+      });
+    }
+
+    return res.status(200).json({
+      user: {
+        id: user._id,
+        authProvider: user.authProvider,
+        email: user.email,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to get current user:", error);
+
+    return res.status(500).json({
+      message: "Failed to retrieve current user",
+    });
+  }
+};
+
+module.exports = { googleLogin, getCurrentUser };
