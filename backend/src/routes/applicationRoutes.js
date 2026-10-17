@@ -6,8 +6,10 @@ const {
   updateApplicationStatus,
   deleteApplication,
 } = require("../controllers/applicationController");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
+router.use(requireAuth);
 
 router.post("/", createApplication);
 router.get("/", getApplications);

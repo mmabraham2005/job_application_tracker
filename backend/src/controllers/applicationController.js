@@ -16,6 +16,7 @@ const createApplication = async (req, res) => {
     const { companyName, jobTitle, applicationDate, status } = req.body;
 
     const application = new Application({
+      userId: req.user._id,
       companyName,
       jobTitle,
       applicationDate,
@@ -41,7 +42,9 @@ const createApplication = async (req, res) => {
 
 const getApplications = async (req, res) => {
   try {
-    const applications = await Application.find();
+    const applications = await Application.find({
+      userId: req.user._id,
+    });
     return res.status(200).json(applications);
   } catch (error) {
     return res.status(500).json({
@@ -79,7 +82,10 @@ const updateApplication = async (req, res) => {
       });
     }
 
-    const application = await Application.findById(id);
+    const application = await Application.findOne({
+      _id: id,
+      userId: req.user._id,
+    });
 
     if (!application) {
       return res.status(404).json({
@@ -138,7 +144,10 @@ const updateApplicationStatus = async (req, res) => {
       });
     }
 
-    const application = await Application.findById(id);
+    const application = await Application.findOne({
+      _id: id,
+      userId: req.user._id,
+    });
 
     if (!application) {
       return res.status(404).json({
@@ -175,7 +184,10 @@ const deleteApplication = async (req, res) => {
       });
     }
 
-    const deletedApplication = await Application.findByIdAndDelete(id);
+    const deletedApplication = await Application.findOneAndDelete({
+      _id: id,
+      userId: req.user._id,
+    });
 
     if (!deletedApplication) {
       return res.status(404).json({
