@@ -140,4 +140,82 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-module.exports = { googleLogin, getCurrentUser };
+const guestLogin = async (req, res) => {
+  try {
+    if (req.session?.userId) {
+      const existingUser = await User.findById(req.session.userId);
+
+      if (existingUser) {
+        return res.status(200).json({
+          user: {
+            id: existingUser._id,
+            authProvider: existingUser.authProvider,
+            email: existingUser.email,
+            displayName: existingUser.displayName,
+            avatarUrl: existingUser.avatarUrl,
+          },
+        });
+      }
+    }
+
+    const user = await User.create({
+      authProvider: "guest",
+      displayName: "Guest",
+    });
+
+    await new Promise((resolve, reject) => {
+      req.session.regenerate((error) => {
+        if (error) return reject(error);
+        resolve();
+      });
+    });
+
+    req.session.userId = user._id.toString();
+
+    await new Promise((resolve, reject) => {
+      req.session.save((error) => {
+        if (error) return reject(error);
+        resolve();
+      });
+    });
+
+    return res.status(201).json({
+      user: {
+        id: user._id,
+        authProvider: user.authProvider,
+        displayName: user.displayName,
+      },
+    });
+  } catch (error) {
+    console.error("Guest login failed:", error);
+
+    return res.status(500).json({
+      message: "Failed to create guest session",
+    });
+  }
+};
+
+const logout = (req, res) => {
+  req.session.destroy((error) => {
+    if (error) {
+      console.error("Logout failed:", error);
+
+      return res.status(500).json({
+        message: "Failed to log out",
+      });
+    }
+
+    res.clearCookie("jobtracker.sid", {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    return res.status(200).json({
+      message: "Logged out successfully",
+    });
+  });
+};
+
+module.exports = { googleLogin, getCurrentUser, guestLogin, logout };
