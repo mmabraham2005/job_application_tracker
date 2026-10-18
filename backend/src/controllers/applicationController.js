@@ -1,14 +1,24 @@
 const mongoose = require("mongoose");
 const Application = require("../models/Application");
 
+const findOwnedApplication = (applicationId, userId) => {
+  return Application.findOne({
+    _id: applicationId,
+    userId,
+  });
+};
+
 const isValidApplicationId = (id) => mongoose.isValidObjectId(id);
 
 const isValidationError = (error) =>
   error.name === "ValidationError" || error.name === "CastError";
 
+const isValidRequestBody = (body) =>
+  body !== null && typeof body === "object" && !Array.isArray(body);
+
 const createApplication = async (req, res) => {
   try {
-    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    if (!isValidRequestBody(req.body)) {
       return res.status(400).json({
         message: "Request body must be a JSON object",
       });
@@ -63,7 +73,7 @@ const updateApplication = async (req, res) => {
       });
     }
 
-    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    if (!isValidRequestBody(req.body)) {
       return res.status(400).json({
         message: "Request body must be a JSON object",
       });
@@ -82,10 +92,7 @@ const updateApplication = async (req, res) => {
       });
     }
 
-    const application = await Application.findOne({
-      _id: id,
-      userId: req.user._id,
-    });
+    const application = await findOwnedApplication(id, req.user._id);
 
     if (!application) {
       return res.status(404).json({
@@ -144,10 +151,7 @@ const updateApplicationStatus = async (req, res) => {
       });
     }
 
-    const application = await Application.findOne({
-      _id: id,
-      userId: req.user._id,
-    });
+    const application = await findOwnedApplication(id, req.user._id);
 
     if (!application) {
       return res.status(404).json({

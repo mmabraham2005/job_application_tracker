@@ -1,5 +1,7 @@
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
+const { createUserSession } = require("../utils/session.js");
+const { serializeUser } = require("../utils/userSerializer.js");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -63,30 +65,10 @@ const googleLogin = async (req, res) => {
         );
       }
 
-      await new Promise((resolve, reject) => {
-        req.session.regenerate((error) => {
-          if (error) return reject(error);
-          resolve();
-        });
-      });
-
-      req.session.userId = user._id.toString();
-
-      await new Promise((resolve, reject) => {
-        req.session.save((error) => {
-          if (error) return reject(error);
-          resolve();
-        });
-      });
+      await createUserSession(req, user._id);
 
       return res.status(200).json({
-        user: {
-          id: user._id,
-          authProvider: user.authProvider,
-          email: user.email,
-          displayName: user.displayName,
-          avatarUrl: user.avatarUrl,
-        },
+        user: serializeUser(user),
       });
     } catch (error) {
       console.error("Google login failed:", error);
@@ -123,13 +105,7 @@ const getCurrentUser = async (req, res) => {
     }
 
     return res.status(200).json({
-      user: {
-        id: user._id,
-        authProvider: user.authProvider,
-        email: user.email,
-        displayName: user.displayName,
-        avatarUrl: user.avatarUrl,
-      },
+      user: serializeUser(user),
     });
   } catch (error) {
     console.error("Failed to get current user:", error);
@@ -147,13 +123,7 @@ const guestLogin = async (req, res) => {
 
       if (existingUser) {
         return res.status(200).json({
-          user: {
-            id: existingUser._id,
-            authProvider: existingUser.authProvider,
-            email: existingUser.email,
-            displayName: existingUser.displayName,
-            avatarUrl: existingUser.avatarUrl,
-          },
+          user: serializeUser(user),
         });
       }
     }
@@ -163,28 +133,10 @@ const guestLogin = async (req, res) => {
       displayName: "Guest",
     });
 
-    await new Promise((resolve, reject) => {
-      req.session.regenerate((error) => {
-        if (error) return reject(error);
-        resolve();
-      });
-    });
-
-    req.session.userId = user._id.toString();
-
-    await new Promise((resolve, reject) => {
-      req.session.save((error) => {
-        if (error) return reject(error);
-        resolve();
-      });
-    });
+    await createUserSession(req, user._id);
 
     return res.status(201).json({
-      user: {
-        id: user._id,
-        authProvider: user.authProvider,
-        displayName: user.displayName,
-      },
+      user: serializeUser(user),
     });
   } catch (error) {
     console.error("Guest login failed:", error);
