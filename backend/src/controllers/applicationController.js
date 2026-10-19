@@ -1,14 +1,24 @@
 const mongoose = require("mongoose");
 const Application = require("../models/Application");
 
+const findOwnedApplication = (applicationId, userId) => {
+  return Application.findOne({
+    _id: applicationId,
+    userId,
+  });
+};
+
 const isValidApplicationId = (id) => mongoose.isValidObjectId(id);
 
 const isValidationError = (error) =>
   error.name === "ValidationError" || error.name === "CastError";
 
+const isValidRequestBody = (body) =>
+  body !== null && typeof body === "object" && !Array.isArray(body);
+
 const createApplication = async (req, res) => {
   try {
-    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    if (!isValidRequestBody(req.body)) {
       return res.status(400).json({
         message: "Request body must be a JSON object",
       });
@@ -16,6 +26,7 @@ const createApplication = async (req, res) => {
     const { companyName, jobTitle, applicationDate, status } = req.body;
 
     const application = new Application({
+      userId: req.user._id,
       companyName,
       jobTitle,
       applicationDate,
@@ -41,7 +52,9 @@ const createApplication = async (req, res) => {
 
 const getApplications = async (req, res) => {
   try {
-    const applications = await Application.find();
+    const applications = await Application.find({
+      userId: req.user._id,
+    });
     return res.status(200).json(applications);
   } catch (error) {
     return res.status(500).json({
@@ -60,7 +73,7 @@ const updateApplication = async (req, res) => {
       });
     }
 
-    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    if (!isValidRequestBody(req.body)) {
       return res.status(400).json({
         message: "Request body must be a JSON object",
       });
@@ -79,7 +92,7 @@ const updateApplication = async (req, res) => {
       });
     }
 
-    const application = await Application.findById(id);
+    const application = await findOwnedApplication(id, req.user._id);
 
     if (!application) {
       return res.status(404).json({
@@ -138,7 +151,7 @@ const updateApplicationStatus = async (req, res) => {
       });
     }
 
-    const application = await Application.findById(id);
+    const application = await findOwnedApplication(id, req.user._id);
 
     if (!application) {
       return res.status(404).json({
@@ -175,7 +188,10 @@ const deleteApplication = async (req, res) => {
       });
     }
 
-    const deletedApplication = await Application.findByIdAndDelete(id);
+    const deletedApplication = await Application.findOneAndDelete({
+      _id: id,
+      userId: req.user._id,
+    });
 
     if (!deletedApplication) {
       return res.status(404).json({

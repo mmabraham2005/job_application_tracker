@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 const { STATUSES } = require("./ApplicationData");
 
 const applicationSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    index: true,
+  },
   companyName: {
     type: String,
     required: true,
