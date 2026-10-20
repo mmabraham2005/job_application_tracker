@@ -10,7 +10,7 @@ import {
   deleteApplication,
 } from '../services/ApplicationApi'
 
-function DashboardView() {
+function DashboardView({ user, onLogout }) {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -86,6 +86,10 @@ function DashboardView() {
       <header className="dashboard-header">
         <h1>Job Application Tracker</h1>
         <p>{applications.length} total applications</p>
+        <div className='user-bar'>
+          <span>Signed in as {user.displayName || user.email || 'Guest'}</span>
+          <button type="button" onClick={onLogout}>Log Out</button>
+        </div>
       </header>
 
       {applications.length > 0 && (
