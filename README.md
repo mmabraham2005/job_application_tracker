@@ -81,6 +81,10 @@ Open another terminal from the project root.
 ```bash
 cd frontend
 npm install
+```
+Create a `.env` file under frontend branch using the `.env.example` template and configure the required environment variables.
+
+```bash
 npm run dev
 ```
 

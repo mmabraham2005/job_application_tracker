@@ -1,0 +1,127 @@
+.login-page {
+    --login-navy: #145B8E;
+    --login-red: #790D16;
+    --login-card: #E6ECF1;
+    --login-cream: #F5EFE1;
+
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    color: black;
+    font-family: "Hammersmith One", sans-serif;
+}
+
+.login-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 22px;
+    color: var(--login-red);
+    font-size: 40px;
+    font-weight: 600
+}
+
+.login-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.login-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 16px;
+}
+
+.login-card {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 559px;
+    height: 424px;
+    padding: 32px 12px 44px;
+    background: var(--login-card);
+    border: 1px solid var(--login-navy);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    text-align: center;
+}
+
+.login-card h1 {
+    margin: 10px 0 20px;
+    color: black;
+    font-size: 40px;
+    font-weight: 600;
+}
+
+.login-error {
+    margin: 0;
+    color: red;
+    font-size: 20px;
+}
+
+.login-btn {
+    box-sizing: border-box;
+    width: 400px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 50px;
+    border: 1px solid var(--login-navy);
+    font-family: "Maven Pro", sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+.google-btn {
+    background: var(--login-navy);
+    color: white;
+}
+
+.google-btn-wrap {
+    position: relative;
+    width: 400px;
+    height: 70px;
+}
+
+.google-btn-overlay {
+    position: absolute;
+    inset: 0;
+    opacity: 0.01;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scaleY(1.75);
+}
+
+.google-btn-wrap:hover .google-btn {
+    opacity: 70%;
+}
+
+.guest-btn {
+    background: var(--login-cream);
+    color: var(--login-navy);
+}
+
+.guest-btn:hover {
+    filter: brightness(0.92);
+}
+
+.guest-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}

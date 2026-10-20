@@ -43,3 +43,19 @@ export function updateApplicationStatus(id, status) {
 export function deleteApplication(id) {
   return request(`${BASE_URL}/${id}`, { method: 'DELETE' })
 }
+
+export function getCurrentUser() {
+  return request( '/api/auth/me').then( (d) => d.user )
+} 
+
+export function loginAsGuest() {
+  return request( '/api/auth/guest', { method: 'POST' }).then( (d) => d.user )
+} 
+
+export function loginWithGoogle(credential){
+  return request( '/api/auth/google', { method : 'POST', body: JSON.stringify({ credential }) }).then( (d) => d.user )
+} 
+
+export function logout() {
+  return request('/api/auth/logout', { method : 'POST' })
+}
