@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import '../style/loginPage.css'
 import { GoogleLogin } from '@react-oauth/google'
-import { loginWithGoogle, loginAsGuest } from '../services/authAPI'
+import { loginWithGoogle, loginAsGuest } from '../services/ApplicationApi'
 
 function LoginPage({ onLogin }) {
     const [error, setError] = useState('')

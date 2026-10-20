@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import DashboardView from './view/DashboardView'
 import LoginPage from './view/LoginPage'
-import { getCurrentUser, logout } from './services/authAPI'
+import { getCurrentUser, logout } from './services/ApplicationApi'
 import './App.css'
-import { use } from 'react'
 
 function App() {
   const [user, setUser] = useState(null)
