@@ -123,7 +123,7 @@ const guestLogin = async (req, res) => {
 
       if (existingUser) {
         return res.status(200).json({
-          user: serializeUser(user),
+          user: serializeUser(existingUser),
         });
       }
     }
