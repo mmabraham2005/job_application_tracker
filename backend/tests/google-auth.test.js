@@ -68,3 +68,55 @@ test("Google login rejects invalid tokens", async (t) => {
   assert.equal(currentUser.status, 401);
   assert.equal(currentUser.body.message, "Not authenticated");
 });
+
+test("Google login rejects invalid account payloads", async (t) => {
+  const originalVerifyIdToken = OAuth2Client.prototype.verifyIdToken;
+
+  t.after(() => {
+    OAuth2Client.prototype.verifyIdToken = originalVerifyIdToken;
+  });
+
+  const app = createApp({
+    sessionStore: new session.MemoryStore(),
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const agent = request.agent(app);
+
+  // Case 1: Google account is missing the subject ID
+  OAuth2Client.prototype.verifyIdToken = async () => ({
+    getPayload: () => ({
+      email: "test@example.com",
+      email_verified: true,
+    }),
+  });
+
+  const missingSubject = await agent
+    .post("/api/auth/google")
+    .send({ credential: "test-token-missing-sub" });
+
+  assert.equal(missingSubject.status, 401);
+  assert.equal(missingSubject.body.message, "Invalid Google account");
+
+  // Case 2: Google email is not verified
+  OAuth2Client.prototype.verifyIdToken = async () => ({
+    getPayload: () => ({
+      sub: "google-user-123",
+      email: "test@example.com",
+      email_verified: false,
+    }),
+  });
+
+  const unverifiedEmail = await agent
+    .post("/api/auth/google")
+    .send({ credential: "test-token-unverified-email" });
+
+  assert.equal(unverifiedEmail.status, 401);
+  assert.equal(unverifiedEmail.body.message, "Invalid Google account");
+
+  // Neither attempt should create an authenticated session
+  const currentUser = await agent.get("/api/auth/me");
+
+  assert.equal(currentUser.status, 401);
+  assert.equal(currentUser.body.message, "Not authenticated");
+});
