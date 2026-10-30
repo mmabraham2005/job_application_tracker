@@ -159,3 +159,38 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
   assert.equal(getAfterDelete.status, 200);
   assert.equal(getAfterDelete.body.length, 0);
 });
+
+test("Unauthenticated users cannot access application APIs", async () => {
+  const app = createApp({
+    sessionStore: new session.MemoryStore(),
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const applicationId = "507f1f77bcf86cd799439012";
+
+  const responses = [
+    await request(app).get("/api/applications"),
+
+    await request(app).post("/api/applications").send({
+      companyName: "Google",
+      jobTitle: "Software Engineer Intern",
+      applicationDate: "2026-10-30",
+      status: "Applied",
+    }),
+
+    await request(app)
+      .patch(`/api/applications/${applicationId}`)
+      .send({ companyName: "Microsoft" }),
+
+    await request(app)
+      .patch(`/api/applications/${applicationId}/status`)
+      .send({ status: "Interview" }),
+
+    await request(app).delete(`/api/applications/${applicationId}`),
+  ];
+
+  for (const response of responses) {
+    assert.equal(response.status, 401);
+    assert.equal(response.body.message, "Not authenticated");
+  }
+});
