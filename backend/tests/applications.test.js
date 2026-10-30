@@ -245,3 +245,75 @@ test("Invalid application IDs return 400", async (t) => {
     assert.equal(response.body.message, "Invalid application ID");
   }
 });
+
+test("Invalid application data returns 400", async (t) => {
+  const originalCreate = User.create;
+  const originalFindById = User.findById;
+  const originalSave = Application.prototype.save;
+
+  const fakeUser = {
+    _id: "507f1f77bcf86cd799439011",
+    authProvider: "guest",
+    displayName: "Guest",
+  };
+
+  User.create = async () => fakeUser;
+  User.findById = async (id) =>
+    id.toString() === fakeUser._id ? fakeUser : null;
+
+  Application.prototype.save = async function () {
+    await this.validate();
+    return this;
+  };
+
+  t.after(() => {
+    User.create = originalCreate;
+    User.findById = originalFindById;
+    Application.prototype.save = originalSave;
+  });
+
+  const app = createApp({
+    sessionStore: new session.MemoryStore(),
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const agent = request.agent(app);
+
+  const login = await agent.post("/api/auth/guest");
+  assert.equal(login.status, 201);
+
+  const invalidStatus = await agent.post("/api/applications").send({
+    companyName: "Google",
+    jobTitle: "Software Engineer Intern",
+    applicationDate: "2026-10-30",
+    status: "Unknown Status",
+  });
+
+  assert.equal(invalidStatus.status, 400);
+  assert.equal(invalidStatus.body.message, "Invalid application data");
+
+  const missingCompany = await agent.post("/api/applications").send({
+    jobTitle: "Software Engineer Intern",
+    applicationDate: "2026-10-30",
+    status: "Applied",
+  });
+
+  assert.equal(missingCompany.status, 400);
+  assert.equal(missingCompany.body.message, "Invalid application data");
+
+  const applicationId = "507f1f77bcf86cd799439012";
+
+  const invalidUpdate = await agent
+    .patch(`/api/applications/${applicationId}`)
+    .send({ userId: fakeUser._id });
+
+  assert.equal(invalidUpdate.status, 400);
+  assert.equal(invalidUpdate.body.message, "Invalid update fields");
+
+  const invalidStatusUpdate = await agent
+    .patch(`/api/applications/${applicationId}/status`)
+    .send({ status: "" });
+
+  assert.equal(invalidStatusUpdate.status, 400);
+  assert.equal(invalidStatusUpdate.body.message, "Valid status is required");
+});
