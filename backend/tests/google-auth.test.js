@@ -3,6 +3,8 @@ const assert = require("node:assert/strict");
 const request = require("supertest");
 const session = require("express-session");
 const { OAuth2Client } = require("google-auth-library");
+const mongoose = require("mongoose");
+const User = require("../src/models/User");
 
 const createApp = require("../src/app");
 
@@ -119,4 +121,94 @@ test("Google login rejects invalid account payloads", async (t) => {
 
   assert.equal(currentUser.status, 401);
   assert.equal(currentUser.body.message, "Not authenticated");
+});
+
+test("Google login authenticates an existing user", async (t) => {
+  // Save original methods
+  const originalVerifyIdToken = OAuth2Client.prototype.verifyIdToken;
+  const originalFindOne = User.findOne;
+  const originalFindById = User.findById;
+  const originalFindOneAndUpdate = User.findOneAndUpdate;
+
+  // Create an existing Google user
+  const existingUser = {
+    _id: new mongoose.Types.ObjectId(),
+    authProvider: "google",
+    googleId: "google-user-123",
+    email: "test@example.com",
+    displayName: "Test User",
+    avatarUrl: "https://example.com/avatar.png",
+  };
+
+  // Mock successful Google token verification
+  OAuth2Client.prototype.verifyIdToken = async (options) => {
+    assert.equal(options.idToken, "valid-google-token");
+
+    return {
+      getPayload: () => ({
+        sub: "google-user-123",
+        email: "test@example.com",
+        email_verified: true,
+        name: "Test User",
+        picture: "https://example.com/avatar.png",
+      }),
+    };
+  };
+
+  // Mock finding an existing Google user
+  User.findOne = async (query) => {
+    assert.equal(query.authProvider, "google");
+    assert.equal(query.googleId, "google-user-123");
+
+    return existingUser;
+  };
+
+  // Mock retrieving the user from the session
+  User.findById = async (id) => {
+    return id.toString() === existingUser._id.toString() ? existingUser : null;
+  };
+
+  // Existing users should not need to be created again
+  let createWasCalled = false;
+
+  User.findOneAndUpdate = async () => {
+    createWasCalled = true;
+    throw new Error("Existing user should not be recreated");
+  };
+
+  // Restore original methods after the test
+  t.after(() => {
+    OAuth2Client.prototype.verifyIdToken = originalVerifyIdToken;
+    User.findOne = originalFindOne;
+    User.findById = originalFindById;
+    User.findOneAndUpdate = originalFindOneAndUpdate;
+  });
+
+  // Create the test app
+  const app = createApp({
+    sessionStore: new session.MemoryStore(),
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const agent = request.agent(app);
+
+  // Log in using a valid Google credential
+  const login = await agent.post("/api/auth/google").send({
+    credential: "valid-google-token",
+  });
+
+  // Verify Google login succeeded
+  assert.equal(login.status, 200);
+  assert.equal(login.body.user.id, existingUser._id.toString());
+  assert.equal(login.body.user.displayName, "Test User");
+
+  // Verify no new user was created
+  assert.equal(createWasCalled, false);
+
+  // Verify the authenticated session persists
+  const currentUser = await agent.get("/api/auth/me");
+
+  assert.equal(currentUser.status, 200);
+  assert.equal(currentUser.body.user.id, existingUser._id.toString());
+  assert.equal(currentUser.body.user.displayName, "Test User");
 });
