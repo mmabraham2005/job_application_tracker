@@ -194,3 +194,54 @@ test("Unauthenticated users cannot access application APIs", async () => {
     assert.equal(response.body.message, "Not authenticated");
   }
 });
+
+test("Invalid application IDs return 400", async (t) => {
+  const originalCreate = User.create;
+  const originalFindById = User.findById;
+
+  const fakeUser = {
+    _id: "507f1f77bcf86cd799439011",
+    authProvider: "guest",
+    displayName: "Guest",
+  };
+
+  t.after(() => {
+    User.create = originalCreate;
+    User.findById = originalFindById;
+  });
+
+  User.create = async () => fakeUser;
+
+  User.findById = async (id) =>
+    id.toString() === fakeUser._id ? fakeUser : null;
+
+  const app = createApp({
+    sessionStore: new session.MemoryStore(),
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const agent = request.agent(app);
+
+  // Authenticate before testing application validation
+  const login = await agent.post("/api/auth/guest");
+  assert.equal(login.status, 201);
+
+  const invalidId = "not-a-valid-id";
+
+  const responses = [
+    await agent
+      .patch(`/api/applications/${invalidId}`)
+      .send({ companyName: "Microsoft" }),
+
+    await agent
+      .patch(`/api/applications/${invalidId}/status`)
+      .send({ status: "Interview" }),
+
+    await agent.delete(`/api/applications/${invalidId}`),
+  ];
+
+  for (const response of responses) {
+    assert.equal(response.status, 400);
+    assert.equal(response.body.message, "Invalid application ID");
+  }
+});
