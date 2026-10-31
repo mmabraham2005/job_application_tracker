@@ -326,3 +326,59 @@ test("Google login creates a new user", async (t) => {
   assert.equal(currentUser.body.user.id, createdUser._id.toString());
   assert.equal(currentUser.body.user.displayName, "New Google User");
 });
+
+test("Google login handles database failures", async (t) => {
+  // Save original methods
+  const originalVerifyIdToken = OAuth2Client.prototype.verifyIdToken;
+  const originalFindOne = User.findOne;
+
+  // Mock successful Google token verification
+  OAuth2Client.prototype.verifyIdToken = async (options) => {
+    assert.equal(options.idToken, "valid-google-token");
+
+    return {
+      getPayload: () => ({
+        sub: "google-user-123",
+        email: "test@example.com",
+        email_verified: true,
+        name: "Test User",
+      }),
+    };
+  };
+
+  // Simulate database connection failure
+  User.findOne = async (query) => {
+    assert.equal(query.authProvider, "google");
+    assert.equal(query.googleId, "google-user-123");
+
+    throw new Error("Database connection failed");
+  };
+
+  // Restore original methods
+  t.after(() => {
+    OAuth2Client.prototype.verifyIdToken = originalVerifyIdToken;
+    User.findOne = originalFindOne;
+  });
+
+  const app = createApp({
+    sessionStore: new session.MemoryStore(),
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const agent = request.agent(app);
+
+  // Attempt Google login with a valid token
+  const response = await agent.post("/api/auth/google").send({
+    credential: "valid-google-token",
+  });
+
+  // Backend must handle database errors
+  assert.equal(response.status, 500);
+  assert.equal(response.body.message, "Failed to complete Google login");
+
+  // Database failure must not create a session
+  const currentUser = await agent.get("/api/auth/me");
+
+  assert.equal(currentUser.status, 401);
+  assert.equal(currentUser.body.message, "Not authenticated");
+});
