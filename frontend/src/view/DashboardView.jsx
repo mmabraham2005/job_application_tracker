@@ -9,6 +9,8 @@ import {
   updateApplicationStatus,
   deleteApplication,
 } from '../services/ApplicationApi'
+import ReminderSection from "../components/ReminderSection";
+import CalendarConnection from "../components/CalendarConnection";
 
 function DashboardView({ user, onLogout }) {
   const [applications, setApplications] = useState([])
@@ -152,6 +154,10 @@ function DashboardView({ user, onLogout }) {
           />
         )}
       </section>
+      <CalendarConnection user={user} />
+      {!loading && (
+  <ReminderSection applications={applications} user={user} />
+)}
     </main>
   )
 }

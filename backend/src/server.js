@@ -7,7 +7,8 @@ const MongoStore = require("connect-mongo").default;
 const connectDB = require("./database/connectDB");
 const authRoutes = require("./routes/authRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
-
+const reminderRoutes = require("./routes/reminderRoutes");
+const calendarRoutes = require("./routes/calendarRoutes");
 const app = express();
 const PORT = 5001;
 
@@ -40,10 +41,14 @@ app.use(
 
 app.use("/api/auth", authRoutes);
 app.use("/api/applications", applicationRoutes);
-
+app.use("/api/reminders", reminderRoutes);
 app.get("/api/health", (req, res) => {
   res.json({ message: "Backend is running" });
 });
+app.use("/api/auth", authRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/reminders", reminderRoutes);
+app.use("/api/calendar", calendarRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

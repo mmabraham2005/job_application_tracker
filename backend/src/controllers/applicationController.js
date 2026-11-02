@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
 const Application = require("../models/Application");
-
+const Reminder = require("../models/Reminder");
 const findOwnedApplication = (applicationId, userId) => {
   return Application.findOne({
     _id: applicationId,
     userId,
   });
 };
-
+const {
+  removeCalendarEvent,
+} = require("../services/calendarService");
 const isValidApplicationId = (id) => mongoose.isValidObjectId(id);
 
 const isValidationError = (error) =>
@@ -188,22 +190,39 @@ const deleteApplication = async (req, res) => {
       });
     }
 
-    const deletedApplication = await Application.findOneAndDelete({
-      _id: id,
-      userId: req.user._id,
-    });
+    const application = await findOwnedApplication(id, req.user._id);
 
-    if (!deletedApplication) {
+    if (!application) {
       return res.status(404).json({
         message: "Application not found",
       });
     }
 
-    return res.status(200).json({
-      message: "Application deleted successfully",
-      application: deletedApplication,
+    const reminders = await Reminder.find({
+      applicationId: id,
+      userId: req.user._id,
     });
-  } catch (error) {
+
+    for (const reminder of reminders) {
+      try {
+        await removeCalendarEvent(req, reminder);
+      } catch {
+        return res.status(502).json({
+          message:
+            "Calendar cleanup failed. Reconnect Google Calendar and retry deletion.",
+        });
+      }
+
+      await reminder.deleteOne();
+    }
+
+    await application.deleteOne();
+
+    return res.json({
+      message: "Application deleted successfully",
+      application,
+    });
+  } catch {
     return res.status(500).json({
       message: "Failed to delete application",
     });
