@@ -222,7 +222,9 @@ const deleteApplication = async (req, res) => {
       message: "Application deleted successfully",
       application,
     });
-  } catch {
+    } catch (error) {
+    console.error("Failed to delete application:", error);
+
     return res.status(500).json({
       message: "Failed to delete application",
     });
