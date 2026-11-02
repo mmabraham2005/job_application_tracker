@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const request = require("supertest");
 const session = require("express-session");
 
+const Reminder = require("../src/models/Reminder");
 const User = require("../src/models/User");
 const Application = require("../src/models/Application");
 const createApp = require("../src/app");
@@ -13,7 +14,6 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
   const originalSave = Application.prototype.save;
   const originalFind = Application.find;
   const originalFindOne = Application.findOne;
-  const originalFindOneAndDelete = Application.findOneAndDelete;
 
   const fakeUser = {
     _id: "507f1f77bcf86cd799439011",
@@ -22,6 +22,29 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
   };
 
   const applications = new Map();
+
+  // This application has no reminders.
+  // Prevent the controller from querying a real MongoDB database.
+  t.mock.method(Reminder, "find", async () => []);
+
+  // The controller now deletes through the application document.
+  t.mock.method(Application.prototype, "deleteOne", async function () {
+    const deleted = applications.delete(this._id.toString());
+
+    return {
+      acknowledged: true,
+      deletedCount: deleted ? 1 : 0,
+    };
+  });
+
+  // Restore manually replaced methods after the test.
+  t.after(() => {
+    User.create = originalCreate;
+    User.findById = originalFindById;
+    Application.prototype.save = originalSave;
+    Application.find = originalFind;
+    Application.findOne = originalFindOne;
+  });
 
   Application.find = async (query) => {
     return [...applications.values()].filter(
@@ -40,18 +63,6 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
     return new Application(saved);
   };
 
-  Application.findOneAndDelete = async (query) => {
-    const saved = applications.get(query._id.toString());
-
-    if (!saved || saved.userId.toString() !== query.userId.toString()) {
-      return null;
-    }
-
-    applications.delete(query._id.toString());
-
-    return saved;
-  };
-
   User.create = async () => fakeUser;
 
   User.findById = async (id) => {
@@ -62,17 +73,9 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
     await this.validate();
 
     applications.set(this._id.toString(), this.toObject());
+
     return this;
   };
-
-  t.after(() => {
-    User.create = originalCreate;
-    User.findById = originalFindById;
-    Application.prototype.save = originalSave;
-    Application.find = originalFind;
-    Application.findOne = originalFindOne;
-    Application.findOneAndDelete = originalFindOneAndDelete;
-  });
 
   const app = createApp({
     sessionStore: new session.MemoryStore(),
@@ -81,9 +84,11 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
 
   const agent = request.agent(app);
 
+  // Log in as a guest.
   const login = await agent.post("/api/auth/guest");
   assert.equal(login.status, 201);
 
+  // Create an application.
   const response = await agent.post("/api/applications").send({
     companyName: "Google",
     jobTitle: "Software Engineer Intern",
@@ -98,6 +103,7 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
   assert.equal(response.body.userId, fakeUser._id);
   assert.equal(applications.size, 1);
 
+  // Retrieve the saved application.
   const getResponse = await agent.get("/api/applications");
 
   assert.equal(getResponse.status, 200);
@@ -108,6 +114,7 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
 
   const applicationId = response.body._id;
 
+  // Update application details.
   const updateResponse = await agent
     .patch(`/api/applications/${applicationId}`)
     .send({
@@ -128,6 +135,7 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
   assert.equal(getAfterUpdate.body[0].companyName, "Microsoft");
   assert.equal(getAfterUpdate.body[0].jobTitle, "Backend Engineer Intern");
 
+  // Update the application status.
   const statusResponse = await agent
     .patch(`/api/applications/${applicationId}/status`)
     .send({
@@ -144,16 +152,20 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
   assert.equal(getAfterStatusUpdate.body.length, 1);
   assert.equal(getAfterStatusUpdate.body[0].status, "Interview");
 
+  // Delete the application.
   const deleteResponse = await agent.delete(
     `/api/applications/${applicationId}`,
   );
 
   assert.equal(deleteResponse.status, 200);
-  assert.equal(deleteResponse.body.message, "Application deleted successfully");
+  assert.equal(
+    deleteResponse.body.message,
+    "Application deleted successfully",
+  );
   assert.equal(deleteResponse.body.application._id, applicationId);
   assert.equal(applications.size, 0);
 
-  // Verify the deleted application no longer appears
+  // Verify the deleted application no longer appears.
   const getAfterDelete = await agent.get("/api/applications");
 
   assert.equal(getAfterDelete.status, 200);
@@ -222,7 +234,7 @@ test("Invalid application IDs return 400", async (t) => {
 
   const agent = request.agent(app);
 
-  // Authenticate before testing application validation
+  // Authenticate before testing application validation.
   const login = await agent.post("/api/auth/guest");
   assert.equal(login.status, 201);
 
@@ -257,7 +269,14 @@ test("Invalid application data returns 400", async (t) => {
     displayName: "Guest",
   };
 
+  t.after(() => {
+    User.create = originalCreate;
+    User.findById = originalFindById;
+    Application.prototype.save = originalSave;
+  });
+
   User.create = async () => fakeUser;
+
   User.findById = async (id) =>
     id.toString() === fakeUser._id ? fakeUser : null;
 
@@ -265,12 +284,6 @@ test("Invalid application data returns 400", async (t) => {
     await this.validate();
     return this;
   };
-
-  t.after(() => {
-    User.create = originalCreate;
-    User.findById = originalFindById;
-    Application.prototype.save = originalSave;
-  });
 
   const app = createApp({
     sessionStore: new session.MemoryStore(),
@@ -282,6 +295,7 @@ test("Invalid application data returns 400", async (t) => {
   const login = await agent.post("/api/auth/guest");
   assert.equal(login.status, 201);
 
+  // Reject an unsupported status.
   const invalidStatus = await agent.post("/api/applications").send({
     companyName: "Google",
     jobTitle: "Software Engineer Intern",
@@ -292,6 +306,7 @@ test("Invalid application data returns 400", async (t) => {
   assert.equal(invalidStatus.status, 400);
   assert.equal(invalidStatus.body.message, "Invalid application data");
 
+  // Reject an application without a company name.
   const missingCompany = await agent.post("/api/applications").send({
     jobTitle: "Software Engineer Intern",
     applicationDate: "2026-10-30",
@@ -303,6 +318,7 @@ test("Invalid application data returns 400", async (t) => {
 
   const applicationId = "507f1f77bcf86cd799439012";
 
+  // Prevent changing application ownership through the update endpoint.
   const invalidUpdate = await agent
     .patch(`/api/applications/${applicationId}`)
     .send({ userId: fakeUser._id });
@@ -310,10 +326,14 @@ test("Invalid application data returns 400", async (t) => {
   assert.equal(invalidUpdate.status, 400);
   assert.equal(invalidUpdate.body.message, "Invalid update fields");
 
+  // Reject an empty status.
   const invalidStatusUpdate = await agent
     .patch(`/api/applications/${applicationId}/status`)
     .send({ status: "" });
 
   assert.equal(invalidStatusUpdate.status, 400);
-  assert.equal(invalidStatusUpdate.body.message, "Valid status is required");
+  assert.equal(
+    invalidStatusUpdate.body.message,
+    "Valid status is required",
+  );
 });

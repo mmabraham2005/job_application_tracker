@@ -3,6 +3,8 @@ const session = require("express-session");
 
 const authRoutes = require("./routes/authRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const reminderRoutes = require("./routes/reminderRoutes");
+const calendarRoutes = require("./routes/calendarRoutes");
 
 const createApp = ({ sessionStore, sessionSecret } = {}) => {
   if (!sessionStore || !sessionSecret) {
@@ -31,6 +33,8 @@ const createApp = ({ sessionStore, sessionSecret } = {}) => {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/applications", applicationRoutes);
+  app.use("/api/reminders", reminderRoutes);
+  app.use("/api/calendar", calendarRoutes);
 
   app.get("/api/health", (req, res) => {
     res.json({ message: "Backend is running" });
