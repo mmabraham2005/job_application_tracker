@@ -158,12 +158,13 @@ button.danger:hover:not(:disabled) {
   flex: 1 1 240px;
 }
 
+/* Filter option */
 .filter-by-date {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: var(-text);
+  color: var(--text);
 }
 
 .application-count {
