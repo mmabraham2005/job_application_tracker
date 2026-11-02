@@ -1,16 +1,17 @@
 .login-page {
     --login-navy: #145B8E;
-    --login-red: #790D16;
-    --login-card: #E6ECF1;
-    --login-cream: #F5EFE1;
+    --login-purple: #aa3bff;
+    --login-button: rgba(170, 59, 255, 0.5);
+    --login-card: rgb(250, 249, 251, 70%);
+    --login-cream: rgba(245, 239, 225);
 
     position: relative;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: white;
-    color: black;
-    font-family: "Hammersmith One", sans-serif;
+    background: black;
+    color: white;
+    font-family: "Maven Pro", sans-serif;
 }
 
 .login-header {
@@ -21,7 +22,6 @@
     align-items: center;
     gap: 6px;
     padding: 14px 22px;
-    color: var(--login-red);
     font-size: 40px;
     font-weight: 600
 }
@@ -43,24 +43,26 @@
 .login-card {
     box-sizing: border-box;
     width: 100%;
+    font-size: 50px;
     max-width: 559px;
-    height: 424px;
+    height: 420px;
     padding: 32px 12px 44px;
     background: var(--login-card);
-    border: 1px solid var(--login-navy);
     border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 40px;
     text-align: center;
+    box-shadow: 0px 10px 20px rgba(255, 255, 255, 0.50);
 }
 
 .login-card h1 {
     margin: 10px 0 20px;
-    color: black;
-    font-size: 40px;
-    font-weight: 600;
+    color: white;
+    font-size: 45px;
+    -webkit-text-stroke: 1px var(--login-purple);
+    font-weight: 800;
 }
 
 .login-error {
@@ -78,16 +80,15 @@
     justify-content: center;
     gap: 10px;
     border-radius: 50px;
-    border: 1px solid var(--login-navy);
-    font-family: "Maven Pro", sans-serif;
-    font-size: 32px;
+    font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+    font-size: 24px;
     font-weight: 600;
     cursor: pointer;
     transition: filter 0.15s ease;
 }
 
 .google-btn {
-    background: var(--login-navy);
+    background: var(--login-purple);
     color: white;
 }
 
@@ -113,8 +114,9 @@
 }
 
 .guest-btn {
-    background: var(--login-cream);
-    color: var(--login-navy);
+    background: white;
+    color: var(--login-purple);
+    border-color: white;
 }
 
 .guest-btn:hover {

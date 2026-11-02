@@ -12,6 +12,11 @@
   letter-spacing: -0.5px;
 }
 
+.user-display {
+  font-size: 20px;
+  font-weight: 700;
+}
+
 /* Inputs and buttons */
 
 input,
@@ -70,6 +75,10 @@ button.danger:hover:not(:disabled) {
   background: var(--danger-bg);
   padding: 8px 12px;
   border-radius: 6px;
+}
+
+.logout-btn {
+  margin-left: 20px;
 }
 
 /* Status summary */
@@ -142,10 +151,26 @@ button.danger:hover:not(:disabled) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
 }
 
-.toolbar input {
+.toolbar input[type='search'] {
   flex: 1 1 240px;
+}
+
+/* Filter option */
+.filter-by-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.application-count {
+  margin: 8px 0;
+  font-size: 14px;
+  color: var(--text);
 }
 
 .empty {
