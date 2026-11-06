@@ -1070,3 +1070,224 @@
     scroll-behavior: auto;
   }
 }
+
+/* ========================================
+   DASHBOARD MINI CALENDAR
+======================================== */
+
+.dashboard .dashboard-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard .calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 20px;
+}
+
+.dashboard .mini-calendar,
+.dashboard .calendar-details {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fcfaff;
+}
+
+.dashboard .mini-calendar-header,
+.dashboard .calendar-upcoming-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.dashboard .mini-calendar-header h3,
+.dashboard .calendar-details h3,
+.dashboard .calendar-upcoming h3 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.dashboard .mini-calendar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dashboard .mini-calendar-navigation button {
+  min-height: 34px;
+  padding: 6px 11px;
+  font-size: 13px;
+}
+
+.dashboard .mini-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.dashboard .mini-calendar-weekday {
+  padding: 8px 0;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dashboard .mini-calendar-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 6px 2px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.dashboard .mini-calendar-day.is-today:not(.is-selected) {
+  border-color: var(--accent-border);
+  color: #7e22ce;
+}
+
+.dashboard .mini-calendar-day.is-selected,
+.dashboard .mini-calendar-day.is-selected:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.dashboard .mini-calendar-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.dashboard .mini-calendar-day.is-selected .mini-calendar-dot {
+  background: #fff;
+}
+
+.dashboard .calendar-details {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dashboard .calendar-event-list,
+.dashboard .calendar-upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard .calendar-event-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.dashboard .calendar-event-list strong,
+.dashboard .calendar-upcoming-list strong {
+  color: var(--text-h);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.dashboard .calendar-event-time,
+.dashboard .calendar-event-state {
+  color: #7e22ce;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dashboard .calendar-event-list li > span,
+.dashboard .calendar-upcoming-list p {
+  font-size: 12px;
+}
+
+.dashboard .calendar-upcoming {
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.dashboard .calendar-upcoming-heading {
+  margin-bottom: 14px;
+}
+
+.dashboard .calendar-upcoming-heading a {
+  color: #8f26e8;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.dashboard .calendar-upcoming-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  background: #fcfaff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.dashboard .calendar-upcoming-list time {
+  flex-shrink: 0;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.dashboard .calendar-empty-message {
+  padding: 20px 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .dashboard .calendar-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard .mini-calendar,
+  .dashboard .calendar-details {
+    padding: 14px;
+  }
+
+  .dashboard .mini-calendar-grid {
+    gap: 2px;
+  }
+
+  .dashboard .mini-calendar-day {
+    min-height: 40px;
+    font-size: 12px;
+  }
+
+  .dashboard .calendar-upcoming-list li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
