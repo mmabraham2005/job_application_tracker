@@ -1,39 +1,24 @@
-import { useEffect, useState } from "react";
-import ReminderForm from "./ReminderForm";
+import { useState } from "react";
 import {
-  getReminders,
   createReminder,
-  updateReminder,
   deleteReminder,
   retryCalendarSync,
+  updateReminder,
 } from "../services/ReminderApi";
+import ReminderForm from "./ReminderForm";
 
-function ReminderSection({ applications, user }) {
-  const [reminders, setReminders] = useState([]);
+function ReminderSection({
+  applications,
+  user,
+  reminders,
+  setReminders,
+  loading,
+  loadError = "",
+}) {
   const [applicationId, setApplicationId] = useState("");
   const [editor, setEditor] = useState(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
-
-  useEffect(() => {
-    let active = true;
-
-    getReminders()
-      .then((data) => {
-        if (active) setReminders(data);
-      })
-      .catch((err) => {
-        if (active) setError(err.message);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // Hide reminders for applications removed from the dashboard.
   const ownedIds = new Set(applications.map((app) => app._id));
@@ -43,9 +28,7 @@ function ReminderSection({ applications, user }) {
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
 
   function openNewReminder() {
-    const application = applications.find(
-      (app) => app._id === applicationId,
-    );
+    const application = applications.find((app) => app._id === applicationId);
 
     if (application) {
       setEditor({ application, reminder: null });
@@ -57,7 +40,7 @@ function ReminderSection({ applications, user }) {
       const updated = await updateReminder(editor.reminder._id, values);
 
       setReminders((previous) =>
-        previous.map((item) => item._id === updated._id ? updated : item),
+        previous.map((item) => (item._id === updated._id ? updated : item)),
       );
     } else {
       const created = await createReminder({
@@ -88,7 +71,7 @@ function ReminderSection({ applications, user }) {
         });
 
         setReminders((previous) =>
-          previous.map((item) => item._id === updated._id ? updated : item),
+          previous.map((item) => (item._id === updated._id ? updated : item)),
         );
       }
     } catch (err) {
@@ -98,155 +81,153 @@ function ReminderSection({ applications, user }) {
     }
   }
   async function handleCalendarRetry(id) {
-  setError("");
-  setBusyId(id);
+    setError("");
+    setBusyId(id);
 
-  try {
-    const updated = await retryCalendarSync(id);
+    try {
+      const updated = await retryCalendarSync(id);
 
-    setReminders((previous) =>
-      previous.map((item) =>
-        item._id === updated._id ? updated : item,
-      ),
-    );
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setBusyId(null);
+      setReminders((previous) =>
+        previous.map((item) => (item._id === updated._id ? updated : item)),
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
   }
-}
 
   return (
-  <section className="reminders">
-    <h2>Reminders</h2>
+    <section className="reminders">
+      <h2>Reminders</h2>
 
-    <div className="toolbar">
-      <select
-        aria-label="Application for reminder"
-        value={applicationId}
-        onChange={(event) => setApplicationId(event.target.value)}
-      >
-        <option value="">Select an application</option>
+      <div className="toolbar">
+        <select
+          aria-label="Application for reminder"
+          value={applicationId}
+          onChange={(event) => setApplicationId(event.target.value)}
+        >
+          <option value="">Select an application</option>
 
-        {applications.map((app) => (
-          <option key={app._id} value={app._id}>
-            {app.companyName} — {app.jobTitle}
-          </option>
-        ))}
-      </select>
+          {applications.map((app) => (
+            <option key={app._id} value={app._id}>
+              {app.companyName} — {app.jobTitle}
+            </option>
+          ))}
+        </select>
 
-      <button
-        type="button"
-        onClick={openNewReminder}
-        disabled={!applicationId}
-      >
-        Add reminder
-      </button>
-    </div>
+        <button
+          type="button"
+          onClick={openNewReminder}
+          disabled={!applicationId}
+        >
+          Add reminder
+        </button>
+      </div>
 
-    {editor && (
-      <ReminderForm
-        key={editor.reminder?._id || editor.application._id}
-        application={editor.application}
-        reminder={editor.reminder}
-        user={user}
-        onSave={handleSave}
-        onCancel={() => setEditor(null)}
-      />
-    )}
+      {editor && (
+        <ReminderForm
+          key={editor.reminder?._id || editor.application._id}
+          application={editor.application}
+          reminder={editor.reminder}
+          user={user}
+          onSave={handleSave}
+          onCancel={() => setEditor(null)}
+        />
+      )}
 
-    {error && (
-      <p className="error" role="alert">
-        {error}
-      </p>
-    )}
+      {(error || loadError) && (
+        <p className="error" role="alert">
+          {error || loadError}
+        </p>
+      )}
 
-    {loading ? (
-      <p>Loading reminders…</p>
-    ) : visibleReminders.length === 0 ? (
-      <p>No reminders yet.</p>
-    ) : (
-      <ul>
-        {visibleReminders.map((reminder) => (
-          <li key={reminder._id}>
-            <strong>{reminder.title}</strong>
+      {loading ? (
+        <p>Loading reminders…</p>
+      ) : visibleReminders.length === 0 ? (
+        <p>No reminders yet.</p>
+      ) : (
+        <ul>
+          {visibleReminders.map((reminder) => (
+            <li key={reminder._id}>
+              <strong>{reminder.title}</strong>
 
-            <p>
-              {reminder.applicationId.companyName}
-              {" — "}
-              {new Date(reminder.dueAt).toLocaleString()}
-            </p>
+              <p>
+                {reminder.applicationId.companyName}
+                {" — "}
+                {new Date(reminder.dueAt).toLocaleString()}
+              </p>
 
-            <p>
-              Remind at: {new Date(reminder.remindAt).toLocaleString()}
-              {" · "}
-              {reminder.state}
-            </p>
+              <p>
+                Remind at: {new Date(reminder.remindAt).toLocaleString()}
+                {" · "}
+                {reminder.state}
+              </p>
 
-            {reminder.calendarSyncError && (
-              <div className="error" role="alert">
-                <p>{reminder.calendarSyncError}</p>
+              {reminder.calendarSyncError && (
+                <div className="error" role="alert">
+                  <p>{reminder.calendarSyncError}</p>
 
-                <button
-                  type="button"
-                  disabled={busyId === reminder._id}
-                  onClick={() => handleCalendarRetry(reminder._id)}
-                >
-                  {busyId === reminder._id
-                    ? "Processing…"
-                    : "Retry calendar sync"}
-                </button>
-              </div>
-            )}
-
-            {reminder.channels?.googleCalendar &&
-              reminder.googleEventUrl &&
-              !reminder.calendarSyncError && (
-                <p>
-                  <a
-                    href={reminder.googleEventUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    disabled={busyId === reminder._id}
+                    onClick={() => handleCalendarRetry(reminder._id)}
                   >
-                    Open in Google Calendar
-                  </a>
-                </p>
+                    {busyId === reminder._id
+                      ? "Processing…"
+                      : "Retry calendar sync"}
+                  </button>
+                </div>
               )}
 
-            <button
-              type="button"
-              disabled={busyId === reminder._id}
-              onClick={() =>
-                setEditor({
-                  application: reminder.applicationId,
-                  reminder,
-                })
-              }
-            >
-              Edit
-            </button>
+              {reminder.channels?.googleCalendar &&
+                reminder.googleEventUrl &&
+                !reminder.calendarSyncError && (
+                  <p>
+                    <a
+                      href={reminder.googleEventUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open in Google Calendar
+                    </a>
+                  </p>
+                )}
 
-            <button
-              type="button"
-              disabled={busyId === reminder._id}
-              onClick={() => handleAction(reminder, "toggle")}
-            >
-              {reminder.state === "pending" ? "Complete" : "Reopen"}
-            </button>
+              <button
+                type="button"
+                disabled={busyId === reminder._id}
+                onClick={() =>
+                  setEditor({
+                    application: reminder.applicationId,
+                    reminder,
+                  })
+                }
+              >
+                Edit
+              </button>
 
-            <button
-              type="button"
-              disabled={busyId === reminder._id}
-              onClick={() => handleAction(reminder, "delete")}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-    )}
-  </section>
-);
+              <button
+                type="button"
+                disabled={busyId === reminder._id}
+                onClick={() => handleAction(reminder, "toggle")}
+              >
+                {reminder.state === "pending" ? "Complete" : "Reopen"}
+              </button>
+
+              <button
+                type="button"
+                disabled={busyId === reminder._id}
+                onClick={() => handleAction(reminder, "delete")}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
 }
 
 export default ReminderSection;

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import ApplicationForm from "../components/ApplicationForm";
 import ApplicationList from "../components/ApplicationList";
 import CalendarConnection from "../components/CalendarConnection";
+import CalendarView from "../components/CalendarView";
 import ReminderSection from "../components/ReminderSection";
 import { DEFAULT_FILTER, SORT_OPTIONS } from "../constants/filters";
 import { STATUSES } from "../constants/statuses";
@@ -12,6 +13,7 @@ import {
   updateApplication,
   updateApplicationStatus,
 } from "../services/ApplicationApi";
+import { getReminders } from "../services/ReminderApi";
 import { toInputDate } from "../utils/dates";
 
 const compareText = (a, b) =>
@@ -37,6 +39,29 @@ function DashboardView({ user, onLogout }) {
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(null);
   const [filter, setFilter] = useState(DEFAULT_FILTER);
+
+  const [reminders, setReminders] = useState([]);
+  const [remindersLoading, setRemindersLoading] = useState(true);
+  const [remindersError, setRemindersError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    getReminders()
+      .then((data) => {
+        if (active) setReminders(data);
+      })
+      .catch((err) => {
+        if (active) setRemindersError(err.message);
+      })
+      .finally(() => {
+        if (active) setRemindersLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     getApplications()
@@ -76,6 +101,9 @@ function DashboardView({ user, onLogout }) {
     try {
       await deleteApplication(id);
       setApplications((apps) => apps.filter((app) => app._id !== id));
+      setReminders((previous) =>
+        previous.filter((reminder) => reminder.applicationId?._id !== id),
+      );
       if (editing?._id === id) setEditing(null);
     } catch (err) {
       setError(`Could not delete application: ${err.message}`);
@@ -148,6 +176,16 @@ function DashboardView({ user, onLogout }) {
       })
       .sort(SortedFunction[sortBy] ?? SortedFunction.newest);
   }, [applications, filter]);
+
+  const visibleReminders = useMemo(() => {
+    const applicationIds = new Set(
+      applications.map((application) => application._id),
+    );
+
+    return reminders.filter((reminder) =>
+      applicationIds.has(reminder.applicationId?._id),
+    );
+  }, [applications, reminders]);
 
   return (
     <main className="dashboard">
@@ -321,9 +359,22 @@ function DashboardView({ user, onLogout }) {
 
       <CalendarConnection user={user} />
 
+      <CalendarView
+        reminders={visibleReminders}
+        loading={remindersLoading || loading}
+        error={remindersError}
+      />
+
       {!loading && (
         <div id="reminders" className="dashboard-reminders-section">
-          <ReminderSection applications={applications} user={user} />
+          <ReminderSection
+            applications={applications}
+            user={user}
+            reminders={reminders}
+            setReminders={setReminders}
+            loading={remindersLoading}
+            loadError={remindersError}
+          />
         </div>
       )}
     </main>
