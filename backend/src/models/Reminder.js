@@ -1,5 +1,13 @@
 const mongoose = require("mongoose");
 
+const emailDeliverySchema = new mongoose.Schema({
+  nextAttemptAt: Date,
+  attempts: { type: Number, default: 0 },
+  sentAt: Date,
+  failedAt: Date,
+  message: { type: mongoose.Schema.Types.Mixed, select: false },
+});
+
 const reminderSchema = new mongoose.Schema(
   {
     userId: {
@@ -36,6 +44,7 @@ const reminderSchema = new mongoose.Schema(
       googleCalendar: { type: Boolean, default: false },
       email: { type: Boolean, default: false },
     },
+    emailDelivery: emailDeliverySchema,
     state: {
       type: String,
       enum: ["pending", "completed"],
@@ -55,5 +64,6 @@ const reminderSchema = new mongoose.Schema(
 );
 
 reminderSchema.index({ userId: 1, dueAt: 1 });
+reminderSchema.index({ state: 1, "channels.email": 1, "emailDelivery.nextAttemptAt": 1 });
 
 module.exports = mongoose.model("Reminder", reminderSchema);

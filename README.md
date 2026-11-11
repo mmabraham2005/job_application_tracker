@@ -94,6 +94,15 @@ Both the frontend and backend must be running for the application to work locall
 
 **Note:** Some features, including authentication, are still under development. The current application management features can be tested without logging in.
 
+### Test email reminders
+
+1. Add `RESEND_API_KEY` and `REMINDER_FROM_EMAIL` to `backend/.env`. For a test to your own inbox, use `onboarding@resend.dev` as the sender and sign in to the tracker with the same email address as your Resend account. To send to other tracker users, use a sender on a domain verified in Resend.
+2. Restart the backend. Sign in with Google and open the reminder form for an application.
+3. Set **Remind me at** a few minutes ahead and the scheduled time at or after it. Select **Email**, and also select **Google Calendar** if you want to test both channels together. Connect Google Calendar before testing its popup.
+4. Save the reminder and keep the backend running. The email worker checks for due reminders about every 15 seconds. Refresh the dashboard to see the email status.
+
+For reminders saved before email delivery was available, edit and save the reminder with **Email** selected to activate it.
+
 ## Development Process
 
 This project is developed using an Agile approach as part of CS 160. The team organizes requirements and implementation work through a product backlog, sprint planning, task assignments, and iterative development.
