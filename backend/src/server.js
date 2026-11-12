@@ -4,6 +4,7 @@ const MongoStore = require("connect-mongo").default;
 
 const connectDB = require("./database/connectDB");
 const createApp = require("./app");
+const { startEmailReminderWorker } = require("./services/emailReminderService");
 
 const PORT = 5001;
 
@@ -19,7 +20,7 @@ const app = createApp({
   sessionSecret: process.env.SESSION_SECRET,
 });
 
-connectDB();
+void connectDB().then(startEmailReminderWorker);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -160,10 +160,10 @@ function ReminderForm({
 
         {!user.email && <p>Sign in with Google to select email.</p>}
 
-        <p>
-        Google Calendar events sync when you save.
-        Email delivery is not available yet.
-        </p>
+        <p>Google Calendar events sync when you save.</p>
+        {values.email && user.email && (
+          <p>Email reminders are sent to {user.email} at the reminder time.</p>
+        )}
       </fieldset>
 
       {error && <p className="error" role="alert">{error}</p>}

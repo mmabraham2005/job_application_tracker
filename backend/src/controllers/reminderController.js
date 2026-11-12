@@ -68,8 +68,8 @@ function validateDetails(body) {
   return null;
 }
 
-function reminderDetails(body) {
-  return {
+function reminderDetails(body, reminder) {
+  const details = {
     title: body.title.trim(),
     type: body.type,
     dueAt: new Date(body.dueAt),
@@ -79,6 +79,14 @@ function reminderDetails(body) {
       email: body.channels.email,
     },
   };
+
+  if (!details.channels.email) {
+    details.emailDelivery = undefined;
+  } else if (!reminder?.emailDelivery || +reminder.remindAt !== +details.remindAt) {
+    details.emailDelivery = { nextAttemptAt: details.remindAt };
+  }
+
+  return details;
 }
 
 function handleError(res, error) {
@@ -183,6 +191,14 @@ const updateReminder = async (req, res) => {
         return res.status(400).json({ message: "Invalid reminder state" });
       }
 
+      if (
+        reminder.state === "completed" &&
+        body.state === "pending" &&
+        reminder.remindAt <= Date.now() &&
+        reminder.emailDelivery?.nextAttemptAt
+      ) {
+        reminder.emailDelivery.nextAttemptAt = undefined;
+      }
       reminder.state = body.state;
     } else {
       const validationError = validateDetails(body);
@@ -197,10 +213,10 @@ const updateReminder = async (req, res) => {
         });
       }
 
-      Object.assign(reminder, reminderDetails(body));
+      reminder.set(reminderDetails(body, reminder));
     }
 
-// Persist the user's changes even if Google is temporarily unavailable.
+    // Persist the user's changes even if Google is temporarily unavailable.
     await reminder.save();
 
     await syncAndSaveCalendar(req, reminder);

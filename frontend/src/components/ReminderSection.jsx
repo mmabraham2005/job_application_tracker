@@ -7,6 +7,16 @@ import {
 } from "../services/ReminderApi";
 import ReminderForm from "./ReminderForm";
 
+function emailStatus(reminder) {
+  const delivery = reminder.emailDelivery;
+  if (delivery?.sentAt) return "Email sent";
+  if (reminder.state === "completed") return "Email canceled";
+  if (!delivery) return "Edit and save to activate email delivery";
+  if (delivery.failedAt) return "Email could not be sent";
+  if (delivery.nextAttemptAt) return "Email scheduled";
+  return "Edit the reminder time to schedule email again";
+}
+
 function ReminderSection({
   applications,
   user,
@@ -163,6 +173,8 @@ function ReminderSection({
                 {" · "}
                 {reminder.state}
               </p>
+
+              {reminder.channels?.email && <p>{emailStatus(reminder)}</p>}
 
               {reminder.calendarSyncError && (
                 <div className="error" role="alert">
