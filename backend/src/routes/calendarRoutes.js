@@ -5,8 +5,7 @@ const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
 
-const CALENDAR_SCOPE =
-  "https://www.googleapis.com/auth/calendar.events.owned";
+const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events.owned";
 
 function createClient() {
   return new OAuth2Client(
@@ -39,6 +38,29 @@ router.get("/status", (req, res) => {
   res.json({
     connected: Boolean(req.session.googleCalendar?.access_token),
   });
+});
+
+router.post("/disconnect", async (req, res) => {
+  try {
+    // Remove Calendar credentials from this user's session.
+    delete req.session.googleCalendar;
+
+    // Cancel any unfinished Calendar authorization flow.
+    delete req.session.calendarOAuth;
+
+    await saveSession(req);
+
+    return res.status(200).json({
+      connected: false,
+      message: "Google Calendar disconnected successfully",
+    });
+  } catch (error) {
+    console.error("Calendar disconnect failed:", error.message);
+
+    return res.status(500).json({
+      message: "Could not disconnect Google Calendar",
+    });
+  }
 });
 
 // Start authorization using a full browser navigation.
@@ -87,9 +109,9 @@ router.get("/callback", async (req, res) => {
       Date.now() - pending.createdAt < 10 * 60 * 1000;
 
     if (!validState) {
-      return res.status(400).send(
-        "Invalid or expired authorization. Try connecting again.",
-      );
+      return res
+        .status(400)
+        .send("Invalid or expired authorization. Try connecting again.");
     }
 
     // Consume the state so the callback cannot be reused.

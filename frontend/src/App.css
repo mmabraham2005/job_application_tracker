@@ -17,6 +17,13 @@
   font-family: var(--sans);
 }
 
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+
 .dashboard *,
 .dashboard *::before,
 .dashboard *::after {
@@ -350,15 +357,16 @@
 
 .dashboard-form-section,
 .dashboard-reminders-section,
-#applications {
+#applications,
+#add-application {
   min-width: 0;
-  scroll-margin-top: 24px;
+  scroll-margin-top: 90px;
 }
 
 .dashboard .applications,
 .dashboard .reminders,
 .dashboard .dashboard-form-section > form,
-.dashboard > section:not(.dashboard-overview) {
+.dashboard-page > section:not(.dashboard-overview) {
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -367,7 +375,7 @@
 
 .dashboard .applications,
 .dashboard .reminders,
-.dashboard > section:not(.dashboard-overview) {
+.dashboard-page > section:not(.dashboard-overview) {
   padding: 24px;
 }
 
@@ -943,7 +951,7 @@
 
   .dashboard .applications,
   .dashboard .reminders,
-  .dashboard > section:not(.dashboard-overview),
+  .dashboard-page > section:not(.dashboard-overview),
   .dashboard .application-form {
     padding: 18px;
     border-radius: 14px;
@@ -1290,4 +1298,273 @@
     flex-direction: column;
     gap: 6px;
   }
+}
+
+/* Multi-page navigation */
+
+/* ========================================
+   MULTI-PAGE STICKY NAVIGATION
+======================================== */
+
+.dashboard-navigation {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  padding: 12px 16px;
+
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(88, 50, 125, 0.08);
+}
+
+.dashboard-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+  padding: 10px 20px;
+
+  border-radius: 10px;
+
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.dashboard-nav-link:visited {
+  color: var(--text);
+}
+
+.dashboard-nav-link:hover:not(.is-active) {
+  background: #f4e9ff;
+  color: var(--text-h);
+}
+
+.dashboard-nav-link.is-active,
+.dashboard-nav-link.is-active:visited {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.dashboard-nav-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Mobile navigation */
+
+@media (max-width: 640px) {
+  .dashboard-page {
+    gap: 22px;
+  }
+
+  .dashboard-navigation {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .dashboard-nav-link {
+    min-width: 0;
+    padding: 10px 6px;
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+/* ========================================
+   SHARED NAVIGATION + ADD APPLICATION
+======================================== */
+
+.dashboard-navigation {
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.dashboard-navigation-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dashboard-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  min-height: 44px;
+  margin-left: auto;
+  padding: 11px 18px;
+
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.dashboard-add-button:visited {
+  color: #ffffff;
+}
+
+.dashboard-add-button:hover {
+  background: #8f26e8;
+  border-color: #8f26e8;
+}
+
+.dashboard-add-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Mobile layout */
+
+@media (max-width: 640px) {
+  .dashboard-navigation {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .dashboard-navigation-links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .dashboard-add-button {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* ========================================
+   INTEGRATED CALENDAR CONNECTION
+======================================== */
+
+.calendar-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.calendar-integration {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.calendar-integration-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.calendar-integration-hint {
+  color: var(--text);
+  font-size: 12px;
+  text-align: right;
+}
+
+.calendar-integration-message {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  max-width: 340px;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.dashboard .calendar-dismiss-btn {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .calendar-section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-integration {
+    align-items: flex-start;
+  }
+
+  .calendar-integration-actions {
+    justify-content: flex-start;
+  }
+
+  .calendar-integration-hint,
+  .calendar-integration-message {
+    text-align: left;
+  }
+
+  .calendar-integration-message {
+    justify-content: flex-start;
+  }
+}
+
+/* Google Calendar Disconnect */
+
+.dashboard .calendar-disconnect-btn {
+  min-height: 34px;
+  padding: 7px 12px;
+
+  background: #ffffff;
+  border: 1px solid #e3d9eb;
+  border-radius: 8px;
+
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dashboard .calendar-disconnect-btn:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.dashboard .calendar-disconnect-btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }

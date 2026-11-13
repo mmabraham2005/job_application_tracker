@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 function CalendarConnection({ user }) {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const result = new URLSearchParams(window.location.search).get("calendar");
+  const result = searchParams.get("calendar");
   const isGoogleUser = user.authProvider === "google";
 
   useEffect(() => {
@@ -38,46 +41,76 @@ function CalendarConnection({ user }) {
     };
   }, [isGoogleUser]);
 
+  function connectCalendar() {
+    window.location.assign("/api/calendar/connect");
+  }
+
+  async function disconnectCalendar() {
+    const confirmed = window.confirm(
+      "Disconnect Google Calendar?\n\n" +
+        "Your applications, reminders, and existing Google Calendar events " +
+        "will not be deleted.",
+    );
+
+    if (!confirmed) return;
+
+    setDisconnecting(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/calendar/disconnect", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not disconnect Google Calendar.");
+      }
+
+      setConnected(false);
+
+      setSearchParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          next.delete("calendar");
+          return next;
+        },
+        { replace: true },
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDisconnecting(false);
+    }
+  }
+
+  function dismissMessage() {
+    setSearchParams(
+      (previous) => {
+        const next = new URLSearchParams(previous);
+        next.delete("calendar");
+        return next;
+      },
+      { replace: true },
+    );
+  }
+
   const statusText = !isGoogleUser
     ? "Google sign-in required"
     : loading
       ? "Checking connection..."
       : error
-        ? "Connection status unavailable"
+        ? "Connection unavailable"
         : connected
-          ? "Connected"
-          : "Not connected";
+          ? "Google Calendar connected"
+          : "Google Calendar not connected";
 
   return (
-    <section className="calendar-connection" aria-labelledby="calendar-title">
-      <div className="calendar-content">
-        <div className="calendar-icon" aria-hidden="true">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="3" y="5" width="18" height="16" rx="2" />
-            <path d="M7 3v4M17 3v4M3 10h18" />
-            <path d="m9 16 2 2 4-4" />
-          </svg>
-        </div>
-
-        <div className="calendar-info">
-          <h2 id="calendar-title">Google Calendar</h2>
-          <p>Keep your application reminders in sync with your calendar.</p>
-        </div>
-      </div>
-
-      <div className="calendar-action">
+    <div className="calendar-integration">
+      <div className="calendar-integration-actions">
         <span
           className={`calendar-status ${
-            connected && isGoogleUser && !error ? "is-connected" : ""
+            isGoogleUser && connected && !error ? "is-connected" : ""
           }`}
           role="status"
         >
@@ -85,35 +118,41 @@ function CalendarConnection({ user }) {
           {statusText}
         </span>
 
-        {!isGoogleUser ? (
-          <p className="calendar-hint">
-            Sign in with Google to connect your calendar.
-          </p>
-        ) : !loading && (!connected || error) ? (
+        {isGoogleUser && !loading && connected && !error && (
+          <button
+            type="button"
+            className="calendar-disconnect-btn"
+            onClick={disconnectCalendar}
+            disabled={disconnecting}
+          >
+            {disconnecting ? "Disconnecting..." : "Disconnect"}
+          </button>
+        )}
+
+        {isGoogleUser && !loading && (!connected || error) && (
           <button
             type="button"
             className="primary calendar-connect-btn"
-            onClick={() => {
-              window.location.assign("/api/calendar/connect");
-            }}
+            onClick={connectCalendar}
+            disabled={disconnecting}
           >
             Connect Google Calendar
           </button>
-        ) : null}
+        )}
       </div>
 
+      {!isGoogleUser && (
+        <p className="calendar-integration-hint">
+          Sign in with Google to enable calendar sync.
+        </p>
+      )}
+
       {(error || result) && (
-        <div className="calendar-messages" aria-live="polite">
-          {error && (
-            <p className="error" role="alert">
-              {error}
-            </p>
-          )}
+        <div className="calendar-integration-message" aria-live="polite">
+          {error && <p role="alert">{error}</p>}
 
           {result === "connected" && (
-            <p className="calendar-success">
-              Google Calendar connected successfully.
-            </p>
+            <p>Google Calendar connected successfully.</p>
           )}
 
           {result === "denied" && <p>Calendar authorization was cancelled.</p>}
@@ -123,13 +162,21 @@ function CalendarConnection({ user }) {
           )}
 
           {result === "failed" && (
-            <p className="error" role="alert">
-              Connection failed. Check the backend terminal and try again.
-            </p>
+            <p role="alert">Calendar connection failed. Please try again.</p>
+          )}
+
+          {result && (
+            <button
+              type="button"
+              className="calendar-dismiss-btn"
+              onClick={dismissMessage}
+            >
+              Dismiss
+            </button>
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
