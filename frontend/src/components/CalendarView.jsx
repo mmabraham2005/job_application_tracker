@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -13,7 +14,12 @@ function localDateKey(value) {
   return `${year}-${month}-${day}`;
 }
 
-function CalendarView({ reminders = [], loading = false, error = "" }) {
+function CalendarView({
+  reminders = [],
+  loading = false,
+  error = "",
+  connectionControl = null,
+}) {
   const [today] = useState(() => new Date());
   const [month, setMonth] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1),
@@ -105,9 +111,13 @@ function CalendarView({ reminders = [], loading = false, error = "" }) {
       className="dashboard-calendar"
       aria-labelledby="dashboard-calendar-title"
     >
-      <div className="dashboard-section-heading">
-        <h2 id="dashboard-calendar-title">Your Calendar</h2>
-        <p>View upcoming application reminders at a glance.</p>
+      <div className="calendar-section-header">
+        <div className="dashboard-section-heading">
+          <h2 id="dashboard-calendar-title">Your Calendar</h2>
+          <p>View upcoming application reminders at a glance.</p>
+        </div>
+
+        {connectionControl}
       </div>
 
       <div className="calendar-layout">
@@ -234,7 +244,7 @@ function CalendarView({ reminders = [], loading = false, error = "" }) {
       <div className="calendar-upcoming">
         <div className="calendar-upcoming-heading">
           <h3>Upcoming Reminders</h3>
-          <a href="#reminders">Manage reminders</a>
+          <Link to="/reminders">Manage reminders</Link>
         </div>
 
         {!loading && !error && upcomingReminders.length === 0 && (

@@ -135,3 +135,127 @@ test("Calendar retry endpoint preserves and reports sync errors", async (t) => {
   // The reminder's existing event reference is preserved.
   assert.equal(response.body.googleEventId, "existing-event-123");
 });
+
+test("Google Calendar disconnect removes session credentials", async (t) => {
+  const user = {
+    _id: "507f1f77bcf86cd799439011",
+    authProvider: "guest",
+    displayName: "Guest",
+  };
+
+  t.mock.method(User, "create", async () => user);
+  t.mock.method(User, "findById", async () => user);
+
+  const agent = request.agent(makeApp());
+
+  const login = await agent.post("/api/auth/guest");
+  assert.equal(login.status, 201);
+
+  const response = await agent.post("/api/calendar/disconnect");
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body, {
+    connected: false,
+    message: "Google Calendar disconnected successfully",
+  });
+
+  const status = await agent.get("/api/calendar/status");
+
+  assert.equal(status.status, 200);
+  assert.deepEqual(status.body, { connected: false });
+});
+
+test("Unauthenticated users cannot disconnect Google Calendar", async () => {
+  const response = await request(makeApp()).post("/api/calendar/disconnect");
+
+  assert.equal(response.status, 401);
+  assert.equal(response.body.message, "Not authenticated");
+});
+
+test("Disconnect removes stored Google Calendar tokens but preserves login", async (t) => {
+  const user = {
+    _id: "507f1f77bcf86cd799439011",
+    authProvider: "google",
+    email: "test@example.com",
+    displayName: "Test User",
+  };
+
+  t.mock.method(User, "findById", async () => user);
+  t.mock.method(User, "create", async () => user);
+
+  const store = new session.MemoryStore();
+
+  const app = createApp({
+    sessionStore: store,
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const agent = request.agent(app);
+
+  const login = await agent.post("/api/auth/guest");
+  assert.equal(login.status, 201);
+
+  // Retrieve the session created by login.
+  const sessions = await new Promise((resolve, reject) => {
+    store.all((error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    });
+  });
+
+  const [sessionId] = Object.keys(sessions);
+  assert.ok(sessionId);
+
+  const storedSession = sessions[sessionId];
+
+  // Simulate an existing Google Calendar connection.
+  storedSession.googleCalendar = {
+    access_token: "test-access-token",
+    refresh_token: "test-refresh-token",
+  };
+
+  storedSession.calendarOAuth = {
+    state: "pending-oauth-state",
+  };
+
+  await new Promise((resolve, reject) => {
+    store.set(sessionId, storedSession, (error) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
+
+  // Calendar should initially report connected.
+  const before = await agent.get("/api/calendar/status");
+  assert.equal(before.status, 200);
+  assert.equal(before.body.connected, true);
+
+  // Disconnect.
+  const disconnect = await agent.post("/api/calendar/disconnect");
+
+  assert.equal(disconnect.status, 200);
+  assert.equal(disconnect.body.connected, false);
+
+  // Calendar should now report disconnected.
+  const after = await agent.get("/api/calendar/status");
+
+  assert.equal(after.status, 200);
+  assert.equal(after.body.connected, false);
+
+  // The user must remain logged in.
+  const currentUser = await agent.get("/api/auth/me");
+
+  assert.equal(currentUser.status, 200);
+  assert.equal(currentUser.body.user.id, user._id);
+
+  // Verify the credentials were actually removed.
+  const updatedSession = await new Promise((resolve, reject) => {
+    store.get(sessionId, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    });
+  });
+
+  assert.equal(updatedSession.googleCalendar, undefined);
+  assert.equal(updatedSession.calendarOAuth, undefined);
+});
