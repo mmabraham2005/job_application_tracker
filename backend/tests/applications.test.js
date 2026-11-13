@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const request = require("supertest");
 const session = require("express-session");
+const mongoose = require("mongoose");
 
 const Reminder = require("../src/models/Reminder");
 const User = require("../src/models/User");
@@ -158,10 +159,7 @@ test("Authenticated guest can perform application CRUD operations", async (t) =>
   );
 
   assert.equal(deleteResponse.status, 200);
-  assert.equal(
-    deleteResponse.body.message,
-    "Application deleted successfully",
-  );
+  assert.equal(deleteResponse.body.message, "Application deleted successfully");
   assert.equal(deleteResponse.body.application._id, applicationId);
   assert.equal(applications.size, 0);
 
@@ -332,8 +330,98 @@ test("Invalid application data returns 400", async (t) => {
     .send({ status: "" });
 
   assert.equal(invalidStatusUpdate.status, 400);
-  assert.equal(
-    invalidStatusUpdate.body.message,
-    "Valid status is required",
-  );
+  assert.equal(invalidStatusUpdate.body.message, "Valid status is required");
+});
+
+test("Deleting an application preserves reminders when calendar cleanup fails", async (t) => {
+  const originalUserCreate = User.create;
+  const originalUserFindById = User.findById;
+  const originalApplicationFindOne = Application.findOne;
+  const originalReminderFind = Reminder.find;
+
+  t.after(() => {
+    User.create = originalUserCreate;
+    User.findById = originalUserFindById;
+    Application.findOne = originalApplicationFindOne;
+    Reminder.find = originalReminderFind;
+  });
+
+  const userId = new mongoose.Types.ObjectId();
+  const applicationId = new mongoose.Types.ObjectId();
+
+  const user = {
+    _id: userId,
+    authProvider: "guest",
+    displayName: "Guest",
+  };
+
+  let applicationDeleted = false;
+  const deletedReminders = [];
+
+  const application = {
+    _id: applicationId,
+    userId,
+    async deleteOne() {
+      applicationDeleted = true;
+    },
+  };
+
+  const reminders = [
+    {
+      _id: new mongoose.Types.ObjectId(),
+      userId,
+      applicationId,
+      // No linked Google event: cleanup succeeds.
+      async deleteOne() {
+        deletedReminders.push("first");
+      },
+    },
+    {
+      _id: new mongoose.Types.ObjectId(),
+      userId,
+      applicationId,
+      googleEventId: "calendar-event-123",
+      // No Calendar authorization in the guest session:
+      // removeCalendarEvent will fail.
+      async deleteOne() {
+        deletedReminders.push("second");
+      },
+    },
+  ];
+
+  User.create = async () => user;
+  User.findById = async () => user;
+
+  Application.findOne = async (query) => {
+    assert.equal(query._id.toString(), applicationId.toString());
+    assert.equal(query.userId.toString(), userId.toString());
+    return application;
+  };
+
+  Reminder.find = async (query) => {
+    assert.equal(query.applicationId.toString(), applicationId.toString());
+    assert.equal(query.userId.toString(), userId.toString());
+    return reminders;
+  };
+
+  const app = createApp({
+    sessionStore: new session.MemoryStore(),
+    sessionSecret: "test-only-session-secret",
+  });
+
+  const agent = request.agent(app);
+
+  const login = await agent.post("/api/auth/guest");
+  assert.equal(login.status, 201);
+
+  const response = await agent.delete(`/api/applications/${applicationId}`);
+
+  // Calendar cleanup fails, so deletion must be rejected.
+  assert.equal(response.status, 502);
+
+  // The application must not be deleted.
+  assert.equal(applicationDeleted, false);
+
+  // No reminders should be deleted when cleanup fails.
+  assert.deepEqual(deletedReminders, []);
 });

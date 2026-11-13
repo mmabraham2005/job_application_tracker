@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const User = require("../src/models/User");
 const Application = require("../src/models/Application");
 const createApp = require("../src/app");
+const Reminder = require("../src/models/Reminder");
 
 test("Users can only access their own applications", async (t) => {
   // Save original methods
@@ -15,7 +16,8 @@ test("Users can only access their own applications", async (t) => {
   const originalSave = Application.prototype.save;
   const originalFind = Application.find;
   const originalFindOne = Application.findOne;
-  const originalFindOneAndDelete = Application.findOneAndDelete;
+  const originalDeleteOne = Application.prototype.deleteOne;
+  const originalReminderFind = Reminder.find;
 
   // Fake database
   const users = new Map();
@@ -76,24 +78,22 @@ test("Users can only access their own applications", async (t) => {
     return new Application(saved);
   };
 
-  // Mock Application.findOneAndDelete()
-  Application.findOneAndDelete = async (query) => {
-    assert.ok(query._id, "Delete query must include _id");
-    assert.ok(query.userId, "Delete query must include userId");
+  // Mock Reminder.find() to avoid querying a real database.
+  // Applications in this test do not have reminders.
+  Reminder.find = async (query) => {
+    assert.ok(query.applicationId, "Reminder query must include applicationId");
+    assert.ok(query.userId, "Reminder query must include userId");
+    return [];
+  };
 
-    const saved = applications.get(query._id.toString());
+  // Mock document deletion used by the current controller.
+  Application.prototype.deleteOne = async function () {
+    const deleted = applications.delete(this._id.toString());
 
-    if (!saved) {
-      return null;
-    }
-
-    if (saved.userId.toString() !== query.userId.toString()) {
-      return null;
-    }
-
-    applications.delete(query._id.toString());
-
-    return saved;
+    return {
+      acknowledged: true,
+      deletedCount: deleted ? 1 : 0,
+    };
   };
 
   // Restore original methods after the test
@@ -103,7 +103,8 @@ test("Users can only access their own applications", async (t) => {
     Application.prototype.save = originalSave;
     Application.find = originalFind;
     Application.findOne = originalFindOne;
-    Application.findOneAndDelete = originalFindOneAndDelete;
+    Application.prototype.deleteOne = originalDeleteOne;
+    Reminder.find = originalReminderFind;
   });
 
   // Create Express app with test-only session storage
@@ -268,4 +269,34 @@ test("Users can only access their own applications", async (t) => {
   assert.equal(listBAfterDelete.status, 200);
   assert.equal(listBAfterDelete.body.length, 1);
   assert.equal(listBAfterDelete.body[0].companyName, "Microsoft");
+
+  // User A deletes their own application.
+  const authorizedDelete = await agentA.delete(
+    `/api/applications/${applicationAId}`,
+  );
+
+  assert.equal(authorizedDelete.status, 200);
+  assert.equal(
+    authorizedDelete.body.message,
+    "Application deleted successfully",
+  );
+
+  // Only User B's application should remain.
+  assert.equal(applications.size, 1);
+  assert.equal(applications.has(applicationAId), false);
+  assert.equal(applications.has(applicationBId), true);
+
+  // User A should no longer see the deleted application.
+  const listAAfterOwnDelete = await agentA.get("/api/applications");
+
+  assert.equal(listAAfterOwnDelete.status, 200);
+  assert.equal(listAAfterOwnDelete.body.length, 0);
+
+  // User B's application must remain unchanged.
+  const listBAfterOwnDelete = await agentB.get("/api/applications");
+
+  assert.equal(listBAfterOwnDelete.status, 200);
+  assert.equal(listBAfterOwnDelete.body.length, 1);
+  assert.equal(listBAfterOwnDelete.body[0]._id, applicationBId);
+  assert.equal(listBAfterOwnDelete.body[0].companyName, "Microsoft");
 });

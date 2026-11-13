@@ -23,16 +23,12 @@ function CalendarView({ reminders = [], loading = false, error = "" }) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    return () => {};
-  }, []);
-  (() => {
     const interval = setInterval(() => {
       setNow(Date.now());
     }, 60_000);
 
     return () => clearInterval(interval);
-  },
-    []);
+  }, []);
 
   const remindersByDate = useMemo(() => {
     const grouped = new Map();

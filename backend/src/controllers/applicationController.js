@@ -7,9 +7,7 @@ const findOwnedApplication = (applicationId, userId) => {
     userId,
   });
 };
-const {
-  removeCalendarEvent,
-} = require("../services/calendarService");
+const { removeCalendarEvent } = require("../services/calendarService");
 const isValidApplicationId = (id) => mongoose.isValidObjectId(id);
 
 const isValidationError = (error) =>
@@ -203,6 +201,7 @@ const deleteApplication = async (req, res) => {
       userId: req.user._id,
     });
 
+    // Complete calendar cleanup before deleting any database records.
     for (const reminder of reminders) {
       try {
         await removeCalendarEvent(req, reminder);
@@ -212,7 +211,10 @@ const deleteApplication = async (req, res) => {
             "Calendar cleanup failed. Reconnect Google Calendar and retry deletion.",
         });
       }
+    }
 
+    // Only delete database records after calendar cleanup succeeds.
+    for (const reminder of reminders) {
       await reminder.deleteOne();
     }
 
@@ -222,7 +224,7 @@ const deleteApplication = async (req, res) => {
       message: "Application deleted successfully",
       application,
     });
-    } catch (error) {
+  } catch (error) {
     console.error("Failed to delete application:", error);
 
     return res.status(500).json({
