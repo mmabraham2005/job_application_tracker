@@ -8,13 +8,18 @@ const reminderRoutes = require("./routes/reminderRoutes");
 const calendarRoutes = require("./routes/calendarRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 
-
 const createApp = ({ sessionStore, sessionSecret } = {}) => {
   if (!sessionStore || !sessionSecret) {
     throw new Error("Session store and session secret are required");
   }
 
   const app = express();
+
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (isProduction) {
+    app.set("trust proxy", 1);
+  }
 
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
@@ -36,7 +41,7 @@ const createApp = ({ sessionStore, sessionSecret } = {}) => {
       store: sessionStore,
       cookie: {
         httpOnly: true,
-        secure: false,
+        secure: isProduction,
         sameSite: "lax",
         maxAge: 1000 * 60 * 60 * 24 * 7,
       },
