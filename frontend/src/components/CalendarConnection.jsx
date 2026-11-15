@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { apiUrl } from "../services/apiConfig";
 
 function CalendarConnection({ user }) {
   const [connected, setConnected] = useState(false);
@@ -18,7 +19,9 @@ function CalendarConnection({ user }) {
 
     async function checkConnection() {
       try {
-        const response = await fetch("/api/calendar/status");
+        const response = await fetch(apiUrl("/api/calendar/status"), {
+          credentials: "include",
+        });
 
         if (!response.ok) {
           throw new Error("Could not check calendar connection.");
@@ -42,7 +45,7 @@ function CalendarConnection({ user }) {
   }, [isGoogleUser]);
 
   function connectCalendar() {
-    window.location.assign("/api/calendar/connect");
+    window.location.assign(apiUrl("/api/calendar/connect"));
   }
 
   async function disconnectCalendar() {
@@ -58,9 +61,9 @@ function CalendarConnection({ user }) {
     setError("");
 
     try {
-      const response = await fetch("/api/calendar/disconnect", {
+      const response = await fetch(apiUrl("/api/calendar/disconnect"), {
         method: "POST",
-        credentials: "same-origin",
+        credentials: "include",
       });
 
       if (!response.ok) {

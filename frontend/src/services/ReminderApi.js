@@ -1,8 +1,11 @@
+import { apiUrl } from "./apiConfig";
+
 const BASE_URL = "/api/reminders";
 
 async function request(url, options = {}) {
-  const response = await fetch(url, {
+  const response = await fetch(apiUrl(url), {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,

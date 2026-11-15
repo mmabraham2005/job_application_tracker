@@ -6,7 +6,7 @@ const connectDB = require("./database/connectDB");
 const createApp = require("./app");
 const { startEmailReminderWorker } = require("./services/emailReminderService");
 
-const PORT = 5001;
+const PORT = Number(process.env.PORT) || 5001;
 
 if (!process.env.MONGODB_URI || !process.env.SESSION_SECRET) {
   throw new Error("MONGODB_URI and SESSION_SECRET are required");

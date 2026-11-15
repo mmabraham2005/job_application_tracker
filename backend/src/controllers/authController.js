@@ -157,10 +157,12 @@ const logout = (req, res) => {
       });
     }
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.clearCookie("jobtracker.sid", {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       sameSite: "lax",
     });
 

@@ -1,63 +1,74 @@
-// Vite proxies /api to the backend on http://localhost:5001
-const BASE_URL = '/api/applications'
+import { apiUrl } from "./apiConfig";
+
+// Local development uses the Vite proxy; production uses VITE_API_URL.
+const BASE_URL = "/api/applications";
 
 async function request(url, options = {}) {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
+  const res = await fetch(apiUrl(url), {
     ...options,
-  })
-  const data = await res.json().catch(() => null)
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+  const data = await res.json().catch(() => null);
 
   if (!res.ok) {
-    throw new Error(data?.error || data?.message || `Request failed (${res.status})`)
+    throw new Error(
+      data?.error || data?.message || `Request failed (${res.status})`,
+    );
   }
-  return data
+  return data;
 }
 
 export function getApplications() {
-  return request(BASE_URL)
+  return request(BASE_URL);
 }
 
 export function createApplication(application) {
   return request(BASE_URL, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(application),
-  })
+  });
 }
 
 // Only companyName, jobTitle and applicationDate are accepted by the backend
 export function updateApplication(id, fields) {
   return request(`${BASE_URL}/${id}`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: JSON.stringify(fields),
-  })
+  });
 }
 
 export function updateApplicationStatus(id, status) {
   return request(`${BASE_URL}/${id}/status`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: JSON.stringify({ status }),
-  })
+  });
 }
 
 export function deleteApplication(id) {
-  return request(`${BASE_URL}/${id}`, { method: 'DELETE' })
+  return request(`${BASE_URL}/${id}`, { method: "DELETE" });
 }
 
 export function getCurrentUser() {
-  return request( '/api/auth/me').then( (d) => d.user )
-} 
+  return request("/api/auth/me").then((d) => d.user);
+}
 
 export function loginAsGuest() {
-  return request( '/api/auth/guest', { method: 'POST' }).then( (d) => d.user )
-} 
+  return request("/api/auth/guest", { method: "POST" }).then((d) => d.user);
+}
 
-export function loginWithGoogle(credential){
-  return request( '/api/auth/google', { method : 'POST', body: JSON.stringify({ credential }) }).then( (d) => d.user )
-} 
+export function loginWithGoogle(credential) {
+  return request("/api/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ credential }),
+  }).then((d) => d.user);
+}
 
 export function logout() {
-  return request('/api/auth/logout', { method : 'POST' })
+  return request("/api/auth/logout", { method: "POST" });
 }
 
 export function getProfile() {
