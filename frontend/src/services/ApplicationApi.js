@@ -59,3 +59,14 @@ export function loginWithGoogle(credential){
 export function logout() {
   return request('/api/auth/logout', { method : 'POST' })
 }
+
+export function getProfile() {
+  return request("/api/profile").then((data) => data.user);
+}
+
+export function updateProfile(displayName) {
+  return request("/api/profile", {
+    method: "PUT",
+    body: JSON.stringify({ displayName }),
+  }).then((data) => data.user);
+}
