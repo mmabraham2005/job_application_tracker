@@ -5,6 +5,7 @@ import DashboardLayout from "./components/DashboardLayout";
 import { getCurrentUser, logout } from "./services/ApplicationApi";
 import DashboardView from "./view/DashboardView";
 import LoginPage from "./view/LoginPage";
+import ProfileSettings from "./view/ProfileSettings";
 
 function RootRedirect() {
   const { search } = useLocation();
@@ -50,6 +51,15 @@ function App() {
         <Route
           path="/reminders"
           element={<DashboardView user={user} onLogout={handleLogout} />}
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProfileSettings
+              user={user}
+              onUserUpdated={setUser}
+            />
+          }
         />
       </Route>
 

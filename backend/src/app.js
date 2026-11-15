@@ -1,10 +1,13 @@
 const express = require("express");
 const session = require("express-session");
+const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 const calendarRoutes = require("./routes/calendarRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+
 
 const createApp = ({ sessionStore, sessionSecret } = {}) => {
   if (!sessionStore || !sessionSecret) {
@@ -12,6 +15,15 @@ const createApp = ({ sessionStore, sessionSecret } = {}) => {
   }
 
   const app = express();
+
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+  app.use(
+    cors({
+      origin: frontendUrl,
+      credentials: true,
+    }),
+  );
 
   app.use(express.json());
 
@@ -35,7 +47,7 @@ const createApp = ({ sessionStore, sessionSecret } = {}) => {
   app.use("/api/applications", applicationRoutes);
   app.use("/api/reminders", reminderRoutes);
   app.use("/api/calendar", calendarRoutes);
-
+  app.use("/api/profile", profileRoutes);
   app.get("/api/health", (req, res) => {
     res.json({ message: "Backend is running" });
   });

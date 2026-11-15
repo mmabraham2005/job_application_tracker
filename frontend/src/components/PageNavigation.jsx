@@ -4,6 +4,7 @@ const navigation = [
   { path: "/dashboard", label: "Dashboard" },
   { path: "/applications", label: "Applications" },
   { path: "/reminders", label: "Reminders" },
+  { path: "/profile", label: "Profile" },
 ];
 
 function PageNavigation() {
