@@ -1,9 +1,5 @@
-
 import { useEffect, useState } from "react";
-import {
-  getProfile,
-  updateProfile,
-} from "../services/ApplicationApi";
+import { getProfile, updateProfile } from "../services/ApplicationApi";
 
 function ProfileSettings({ user, onUserUpdated }) {
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -76,43 +72,55 @@ function ProfileSettings({ user, onUserUpdated }) {
 
   if (loading) {
     return (
-      <main className="dashboard-section">
-        <p>Loading profile...</p>
+      <main className="dashboard-page">
+        <div className="dashboard-welcome">
+          <h1>Profile Settings</h1>
+          <p>Loading your account information...</p>
+        </div>
       </main>
     );
   }
 
+  const isGoogleUser = user?.authProvider === "google";
+
   return (
-    <main className="dashboard-section">
-      <section className="section-heading">
-        <div>
-          <h1>Profile Settings</h1>
-          <p>Manage your account information.</p>
+    <main className="dashboard-page">
+      <div className="dashboard-welcome">
+        <h1>Profile Settings</h1>
+        <p>Manage your personal information and account details.</p>
+      </div>
+
+      <section className="profile-card profile-identity">
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt=""
+            className="profile-avatar"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="profile-avatar profile-avatar-placeholder">
+            {(displayName || user?.displayName || "G").charAt(0).toUpperCase()}
+          </div>
+        )}
+
+        <div className="profile-identity-info">
+          <h2>{user?.displayName || "Your Profile"}</h2>
+          <p>{email || "Guest account"}</p>
+          <span className="profile-account-badge">
+            {isGoogleUser ? "Google Account" : "Guest Account"}
+          </span>
         </div>
       </section>
 
-      <section className="dashboard-card profile-settings-card">
-        <div className="profile-settings-header">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt="Profile"
-              className="profile-avatar"
-            />
-          ) : (
-            <div className="profile-avatar profile-avatar-placeholder">
-              {displayName.charAt(0).toUpperCase() || "?"}
-            </div>
-          )}
-
-          <div>
-            <h2>{displayName || "Your Profile"}</h2>
-            <p>{email || "Guest account"}</p>
-          </div>
+      <section className="profile-card">
+        <div className="profile-section-heading">
+          <h2>Personal Information</h2>
+          <p>Update how your name appears throughout the dashboard.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="profile-settings-form">
-          <div className="form-group">
+          <div className="profile-form-field">
             <label htmlFor="displayName">Display Name</label>
             <input
               id="displayName"
@@ -125,20 +133,24 @@ function ProfileSettings({ user, onUserUpdated }) {
               placeholder="Enter your display name"
               maxLength={100}
               disabled={saving}
+              required
             />
           </div>
 
-          <div className="form-group">
+          <div className="profile-form-field">
             <label htmlFor="email">Email Address</label>
             <input
               id="email"
               type="email"
               value={email}
+              placeholder="Not available for guest accounts"
               readOnly
               disabled
             />
             <p className="profile-field-hint">
-              Your email address cannot be changed here.
+              {isGoogleUser
+                ? "Your email is linked to your Google account."
+                : "Guest accounts do not have a linked email address."}
             </p>
           </div>
 
@@ -155,11 +167,7 @@ function ProfileSettings({ user, onUserUpdated }) {
           )}
 
           <div className="profile-settings-actions">
-            <button
-              type="submit"
-              className="primary"
-              disabled={saving}
-            >
+            <button type="submit" className="primary" disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
