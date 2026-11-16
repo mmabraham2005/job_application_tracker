@@ -9,6 +9,8 @@ Job Application Tracker is a web application designed to help students and job s
 
 Keeping track of applications across different companies can become difficult, especially when each application has a different status or timeline. Our goal is to provide a simple, centralized platform where users can record their applications, monitor progress, and manage their job search more efficiently.
 
+App deployed here: https://myjobtracker.space
+
 ## Features
 
 ### Implemented
