@@ -152,6 +152,7 @@
   color: var(--text-h);
   font-size: 18px;
   font-weight: 800;
+  line-height: 1.2;
   text-decoration: none;
 }
 
@@ -160,9 +161,12 @@
 }
 
 .dashboard-brand img {
-  width: 32px;
-  height: 32px;
+  display: block;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
   object-fit: contain;
+  transform: translateY(-2px);
 }
 
 .dashboard-brand:hover {

@@ -1,9 +1,30 @@
-<svg width="40" height="39" viewBox="0 0 40 39" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="8.33325" y="4.875" width="18.3333" height="21.125" rx="2" fill="#D9D9D9" fill-opacity="0.3"/>
-<path d="M15 11.375L21.6667 11.375" stroke-width="1.2" stroke-linecap="round" stroke="white"/>
-<path d="M15 24.375L20 24.375" stroke-width="1.2" stroke-linecap="round" stroke="white"/>
-<path d="M15 17.875L25 17.875" stroke-width="1.2" stroke-linecap="round" stroke="white"/>
-<path d="M31.6666 17.875V10.875C31.6666 8.04657 31.6666 6.63236 30.7879 5.75368C29.9092 4.875 28.495 4.875 25.6666 4.875H14.3333C11.5048 4.875 10.0906 4.875 9.21193 5.75368C8.33325 6.63236 8.33325 8.04657 8.33325 10.875V28.125C8.33325 30.9534 8.33325 32.3676 9.21193 33.2463C10.0906 34.125 11.5048 34.125 14.3333 34.125H19.9999" stroke-width="1.2" stroke-linecap="round" stroke="#F2F2F7"/>
-<ellipse cx="29.1667" cy="28.4375" rx="4.16667" ry="4.0625" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
-<path d="M35 34.125L32.5 31.6875" stroke-width="1.2" stroke-linecap="round" stroke="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Job Application Tracker logo">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5121AD"/>
+      <stop offset="1" stop-color="#271072"/>
+    </linearGradient>
+    <linearGradient id="track" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#CEB8FF"/>
+      <stop offset="1" stop-color="#9970F1"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#A786F0"/>
+      <stop offset="1" stop-color="#8360E5"/>
+    </linearGradient>
+  </defs>
+  <!-- Handle and briefcase body: transparent outside the silhouette -->
+  <path d="M194 168v-26c0-28 23-51 51-51h22c28 0 51 23 51 51v26h-35v-26c0-9-7-16-16-16h-22c-9 0-16 7-16 16v26z" fill="url(#body)"/>
+  <rect x="61" y="163" width="390" height="306" rx="76" fill="url(#body)"/>
+  <!-- Progress track -->
+  <path d="M160 236c-27 0-43 15-43 41v111c0 27 16 42 43 42" stroke="url(#track)" stroke-width="17" fill="none" stroke-linecap="round"/>
+  <circle cx="167" cy="236" r="25" fill="#BDA6FF"/>
+  <circle cx="167" cy="311" r="25" fill="#A98BF5"/>
+  <circle cx="167" cy="411" r="25" fill="#FFFFFF"/>
+  <!-- Two open job-tracking steps -->
+  <rect x="203" y="211" width="195" height="49" rx="24.5" fill="url(#track)"/>
+  <rect x="203" y="286" width="202" height="49" rx="24.5" fill="url(#bar)"/>
+  <!-- Completed application -->
+  <rect x="203" y="382" width="203" height="55" rx="27.5" fill="#FFFFFF"/>
+  <path d="m328 409 14 14 28-30" fill="none" stroke="#5430B9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

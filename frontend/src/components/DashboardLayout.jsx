@@ -92,7 +92,7 @@ function DashboardLayout({ user, onLogout }) {
       <header className="dashboard-header">
         <div className="dashboard-topbar">
           <Link to="/dashboard" className="dashboard-brand">
-            <img src="/favicon.svg" alt="" />
+            <img src="/logo.svg" alt="" />
             <span>Application Tracker</span>
           </Link>
 
