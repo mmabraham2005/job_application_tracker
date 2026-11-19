@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import DashboardLayout from "./components/DashboardLayout";
+import LoadingScreen from "./components/LoadingScreen";
 import { getCurrentUser, logout } from "./services/ApplicationApi";
 import DashboardView from "./view/DashboardView";
 import LoginPage from "./view/LoginPage";
@@ -32,7 +33,7 @@ function App() {
     }
   }
 
-  if (checking) return <p>Loading...</p>;
+  if (checking) return <LoadingScreen />;
 
   if (!user) return <LoginPage onLogin={setUser} />;
 
@@ -54,12 +55,7 @@ function App() {
         />
         <Route
           path="/profile"
-          element={
-            <ProfileSettings
-              user={user}
-              onUserUpdated={setUser}
-            />
-          }
+          element={<ProfileSettings user={user} onUserUpdated={setUser} />}
         />
       </Route>
 

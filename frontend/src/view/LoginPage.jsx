@@ -43,7 +43,7 @@ function LoginPage({ onLogin }) {
           className="login-brand"
           aria-label="Application Tracker Home"
         >
-          <img className="login-logo" src="/favicon.svg" alt="" />
+          <img className="login-logo" src="/logo.svg" alt="" />
           <span>Application Tracker</span>
         </a>
       </header>
@@ -51,7 +51,7 @@ function LoginPage({ onLogin }) {
       <main className="login-box">
         <section className="login-card" aria-labelledby="login-title">
           <div className="login-icon" aria-hidden="true">
-            <img src="/favicon.svg" alt="" />
+            <img src="/logo.svg" alt="" />
           </div>
 
           <h1 id="login-title">Welcome back</h1>
