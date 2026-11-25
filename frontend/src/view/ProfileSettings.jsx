@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import EmailDetectionPreferences from "../components/EmailDetectionPreferences";
+import GmailConnection from "../components/GmailConnection";
 import { getProfile, updateProfile } from "../services/ApplicationApi";
 
 function ProfileSettings({ user, onUserUpdated }) {
@@ -173,6 +175,10 @@ function ProfileSettings({ user, onUserUpdated }) {
           </div>
         </form>
       </section>
+
+      <GmailConnection user={user} />
+
+      <EmailDetectionPreferences key={user.id} user={user} />
     </main>
   );
 }

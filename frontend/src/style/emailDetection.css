@@ -1,0 +1,1127 @@
+/* ========================================
+   GMAIL CONNECTION
+======================================== */
+
+.dashboard .gmail-connection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.gmail-connection .profile-section-heading {
+  margin-bottom: 0;
+}
+
+/* Connection status */
+
+.gmail-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gmail-status-dot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  background: #a1a1aa;
+}
+
+.gmail-status.is-connected {
+  color: #15803d;
+}
+
+.gmail-status.is-connected .gmail-status-dot {
+  background: #22c55e;
+}
+
+/* Privacy information */
+
+.gmail-privacy-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 16px 18px;
+
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.gmail-privacy-note strong {
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gmail-privacy-note p {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* OAuth callback feedback */
+
+.gmail-callback-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.gmail-callback-message .profile-success {
+  width: 100%;
+}
+
+.dashboard .gmail-callback-message button {
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Connection actions */
+
+.gmail-connection-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+/* ========================================
+   RESPONSIVE - MOBILE
+======================================== */
+
+@media (max-width: 640px) {
+  .dashboard .gmail-connection {
+    gap: 16px;
+  }
+
+  .gmail-privacy-note {
+    padding: 14px;
+  }
+
+  .gmail-connection-actions {
+    justify-content: stretch;
+  }
+
+  .dashboard .gmail-connection-actions button {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   EMAIL AUTO DETECTION
+======================================== */
+
+.dashboard .email-detection {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* Connection header */
+
+.email-detection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.email-detection-settings-link,
+.email-detection-settings-link:visited {
+  color: #8f26e8;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.email-detection-settings-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.email-detection-settings-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Scan actions */
+
+.email-detection-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard .email-detection-actions button {
+  min-height: 44px;
+  padding: 11px 20px;
+}
+
+.dashboard .email-detection-actions button:disabled {
+  cursor: wait;
+}
+
+/* Loading feedback */
+
+.email-detection-loading {
+  padding: 14px 16px;
+
+  background: var(--accent-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  color: #7e22ce;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ========================================
+   SCAN RESULTS
+======================================== */
+
+.email-detection-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.email-detection-results h3 {
+  margin: 0;
+
+  color: var(--text-h);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.email-detection-results > p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Scan statistics */
+
+.email-detection-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.email-detection-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+
+  padding: 16px;
+
+  background: #fcfaff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.email-detection-stat strong {
+  color: #8f26e8;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.email-detection-stat span {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* Additional results notice */
+
+.email-detection-notice {
+  padding: 12px 14px;
+
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ========================================
+   EMAIL DETECTION - TABLET
+======================================== */
+
+@media (max-width: 900px) {
+  .email-detection-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ========================================
+   EMAIL DETECTION - MOBILE
+======================================== */
+
+@media (max-width: 640px) {
+  .dashboard .email-detection {
+    gap: 16px;
+  }
+
+  .email-detection-header {
+    align-items: flex-start;
+  }
+
+  .email-detection-actions {
+    width: 100%;
+  }
+
+  .dashboard .email-detection-actions button {
+    width: 100%;
+  }
+
+  .email-detection-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .email-detection-stat {
+    padding: 12px;
+  }
+
+  .email-detection-stat strong {
+    font-size: 22px;
+  }
+
+  .email-detection-results {
+    gap: 14px;
+    padding-top: 16px;
+  }
+}
+
+/* Small mobile screens */
+
+@media (max-width: 380px) {
+  .email-detection-stat {
+    padding: 10px;
+  }
+
+  .email-detection-stat span {
+    font-size: 11px;
+  }
+}
+
+/* ========================================
+   APPLICATION SUGGESTIONS
+======================================== */
+
+.application-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.suggestion-list-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-list-heading h3 {
+  margin: 0;
+
+  color: var(--text-h);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.suggestion-list-heading p {
+  margin: 0;
+
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.suggestion-item {
+  min-width: 0;
+
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.suggestion-item:focus-within {
+  border-color: #aa3bff;
+}
+
+/* ========================================
+   SUGGESTION CARD
+======================================== */
+
+.application-suggestion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+
+  padding: 20px;
+}
+
+.suggestion-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.suggestion-card-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-card-identity h4 {
+  margin: 0;
+
+  color: var(--text-h);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.suggestion-job-title {
+  margin: 0;
+
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.suggestion-date {
+  margin: 0;
+
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.suggestion-date span {
+  font-weight: 500;
+}
+
+/* ========================================
+   CONFIDENCE INDICATORS
+======================================== */
+
+.suggestion-confidence {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  padding: 5px 10px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.suggestion-confidence.confidence-high {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.suggestion-confidence.confidence-medium {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.suggestion-confidence.confidence-low {
+  background: #f4f4f5;
+  border-color: #e4e4e7;
+  color: #52525b;
+}
+
+/* ========================================
+   SUGGESTION WARNINGS
+======================================== */
+
+.suggestion-missing-field {
+  margin: 0;
+
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.application-suggestion-card > .suggestion-missing-field {
+  padding: 10px 12px;
+
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+}
+
+.suggestion-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  margin: 0;
+  padding-left: 20px;
+
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.suggestion-warnings li {
+  overflow-wrap: anywhere;
+}
+
+.suggestion-duplicate-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 12px 14px;
+
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.suggestion-duplicate-warning strong {
+  font-weight: 700;
+}
+
+.suggestion-duplicate-warning p {
+  margin: 0;
+}
+
+/* ========================================
+   SUGGESTION CARD ACTIONS
+======================================== */
+
+.suggestion-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.dashboard .suggestion-card-actions button {
+  min-height: 38px;
+  padding: 9px 16px;
+  font-size: 13px;
+}
+
+/* ========================================
+   INLINE SUGGESTION REVIEW FORM
+======================================== */
+
+.suggestion-review-container {
+  min-width: 0;
+
+  padding: 20px;
+
+  background: #faf5ff;
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 12px 12px;
+}
+
+.dashboard .suggestion-review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+
+  margin: 0;
+}
+
+.suggestion-review-form .dashboard-section-heading {
+  margin: 0;
+}
+
+.suggestion-review-form .dashboard-section-heading h2 {
+  margin: 0;
+
+  font-size: 17px;
+}
+
+.suggestion-review-form .dashboard-section-heading p {
+  margin: 6px 0 0;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.suggestion-review-form .form-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.suggestion-review-form .form-fields label {
+  min-width: 0;
+}
+
+.suggestion-review-form input,
+.suggestion-review-form select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.suggestion-field-hint {
+  display: block;
+
+  margin: 0;
+
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.suggestion-review-form label .suggestion-field-hint {
+  margin-top: 6px;
+}
+
+.suggestion-review-form .form-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard .suggestion-review-form button:disabled {
+  cursor: not-allowed;
+}
+
+/* ========================================
+   SUGGESTIONS - MOBILE
+======================================== */
+
+@media (max-width: 640px) {
+  .application-suggestion-card {
+    padding: 16px;
+  }
+
+  .suggestion-card-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .suggestion-card-identity {
+    width: 100%;
+  }
+
+  .suggestion-confidence {
+    align-self: flex-start;
+  }
+
+  .suggestion-card-actions {
+    justify-content: stretch;
+  }
+
+  .dashboard .suggestion-card-actions button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .suggestion-review-container {
+    padding: 16px;
+  }
+
+  .suggestion-review-form .form-fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .suggestion-review-form .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard .suggestion-review-form .form-actions button {
+    width: 100%;
+  }
+}
+
+/* Small mobile screens */
+
+@media (max-width: 380px) {
+  .application-suggestion-card {
+    padding: 12px;
+  }
+
+  .suggestion-review-container {
+    padding: 12px;
+  }
+
+  .suggestion-card-identity h4 {
+    font-size: 15px;
+  }
+
+  .suggestion-job-title {
+    font-size: 13px;
+  }
+}
+
+/* ========================================
+   SUGGESTION DISMISSAL
+======================================== */
+
+.email-detection-dismiss-feedback {
+  margin: 0;
+  padding: 12px 14px;
+
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+
+  color: #52525b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Six scan result counters */
+
+@media (min-width: 1101px) {
+  .email-detection-stats {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1100px) {
+  .email-detection-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ========================================
+   EMAIL DETECTION PREFERENCES
+======================================== */
+
+.dashboard .email-detection-preferences {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.email-detection-preferences .profile-section-heading {
+  margin-bottom: 0;
+}
+
+.email-detection-preferences .profile-section-heading p {
+  line-height: 1.6;
+}
+
+/* Sender preference groups */
+
+.sender-preference-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+
+  padding: 20px;
+  background: #fcfaff;
+  border: 1px solid #e8def1;
+  border-radius: 14px;
+}
+
+.sender-preference-group h3 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sender-preference-group .profile-field-hint {
+  line-height: 1.6;
+}
+
+.sender-preference-group label {
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Sender input and Add button */
+
+.sender-preference-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboard .sender-preference-input-row input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.dashboard .sender-preference-input-row button {
+  flex-shrink: 0;
+  min-width: 76px;
+  min-height: 44px;
+
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.dashboard .sender-preference-input-row button:hover:not(:disabled) {
+  background: #8f26e8;
+  border-color: #8f26e8;
+}
+
+.dashboard .sender-preference-input-row input:disabled {
+  background: #f5f1f8;
+  color: var(--text);
+  cursor: not-allowed;
+}
+
+.dashboard .sender-preference-input-row input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+/* Sender counter and empty state */
+
+.sender-preference-count {
+  margin: 0;
+  color: var(--text);
+  font-size: 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.sender-preference-empty {
+  margin: 0;
+  padding: 16px;
+
+  background: #ffffff;
+  border: 1px dashed #ded6e8;
+  border-radius: 10px;
+
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Sender lists */
+
+.sender-preference-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  max-height: 320px;
+  overflow-y: auto;
+
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sender-preference-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+
+.sender-preference-item > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Trusted sender appearance */
+
+.sender-preference-item.is-trusted {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+/* Blocked sender appearance */
+
+.sender-preference-item.is-blocked {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Remove buttons */
+
+.dashboard .sender-preference-item button {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 6px 12px;
+
+  background: #ffffff;
+  border-color: #e3d9eb;
+  border-radius: 8px;
+
+  color: var(--text);
+  font-size: 12px;
+}
+
+.dashboard .sender-preference-item button:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+/* Overlapping sender rules */
+
+.sender-preference-conflicts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+
+  padding: 16px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.sender-preference-conflicts h3 {
+  margin: 0;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sender-preference-conflicts p {
+  margin: 0;
+}
+
+.sender-preference-conflicts ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  margin: 0;
+  padding-left: 20px;
+}
+
+/* Privacy and usage information */
+
+.email-detection-preferences .gmail-privacy-note {
+  margin: 0;
+}
+
+.email-detection-preferences .gmail-privacy-note p {
+  line-height: 1.6;
+}
+
+.email-detection-preferences .gmail-privacy-note p + p {
+  margin-top: 8px;
+}
+
+/* Loading and recovery states */
+
+.sender-preference-load-error,
+.sender-preference-recovery-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sender-preference-load-error .error {
+  width: 100%;
+}
+
+.dashboard .sender-preference-recovery-actions button,
+.dashboard .sender-preference-load-error button {
+  min-height: 40px;
+  font-size: 13px;
+  white-space: normal;
+}
+
+/* Save status and feedback */
+
+.sender-preference-save-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sender-preference-save-status p {
+  margin: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.sender-preference-unsaved {
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.email-detection-preferences .error,
+.email-detection-preferences .profile-success {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.email-detection-preferences .profile-settings-actions {
+  margin-top: 0;
+}
+
+.dashboard .email-detection-preferences .profile-settings-actions button {
+  min-width: 160px;
+  min-height: 44px;
+}
+
+/* Saving and verification feedback */
+
+.dashboard .email-detection-preferences[aria-busy="true"] button:disabled {
+  cursor: wait;
+}
+
+/* ========================================
+   EMAIL PREFERENCES - RESPONSIVE
+======================================== */
+
+@media (max-width: 640px) {
+  .dashboard .email-detection-preferences {
+    gap: 16px;
+  }
+
+  .sender-preference-group {
+    padding: 16px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .sender-preference-input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard .sender-preference-input-row input,
+  .dashboard .sender-preference-input-row button {
+    width: 100%;
+  }
+
+  .sender-preference-item {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .sender-preference-list {
+    max-height: 280px;
+  }
+
+  .sender-preference-conflicts {
+    padding: 12px;
+  }
+
+  .sender-preference-load-error,
+  .sender-preference-recovery-actions {
+    align-items: stretch;
+  }
+
+  .dashboard .sender-preference-recovery-actions button,
+  .dashboard .sender-preference-load-error button,
+  .dashboard .email-detection-preferences .profile-settings-actions button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .sender-preference-group {
+    padding: 12px;
+  }
+
+  .sender-preference-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard .sender-preference-item button {
+    width: 100%;
+  }
+}
