@@ -17,6 +17,16 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    emailDetectionPreferences: {
+      trustedSenders: {
+        type: [String],
+        default: [],
+      },
+      blockedSenders: {
+        type: [String],
+        default: [],
+      },
+    },
     displayName: {
       type: String,
       trim: true,

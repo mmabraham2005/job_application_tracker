@@ -4,6 +4,7 @@ import ApplicationForm from "../components/ApplicationForm";
 import ApplicationList from "../components/ApplicationList";
 import CalendarConnection from "../components/CalendarConnection";
 import CalendarView from "../components/CalendarView";
+import EmailDetection from "../components/EmailDetection";
 import ReminderSection from "../components/ReminderSection";
 import { DEFAULT_FILTER, SORT_OPTIONS } from "../constants/filters";
 import { STATUSES } from "../constants/statuses";
@@ -70,6 +71,20 @@ function DashboardView({ user }) {
   async function handleCreate(values) {
     const created = await createApplication(values);
     setApplications((apps) => [...apps, created]);
+  }
+
+  function handleImportedApplication(application) {
+    setApplications((previous) => {
+      const alreadyExists = previous.some(
+        (item) => item._id === application._id,
+      );
+
+      if (alreadyExists) {
+        return previous;
+      }
+
+      return [...previous, application];
+    });
   }
 
   async function handleUpdate(values) {
@@ -175,6 +190,12 @@ function DashboardView({ user }) {
 
       {isApplications && (
         <>
+          <EmailDetection
+            user={user}
+            applicationsLoading={loading}
+            onApplicationImported={handleImportedApplication}
+          />
+
           <div id="add-application" className="dashboard-form-section">
             <ApplicationForm
               key={editing?._id ?? "new"}
